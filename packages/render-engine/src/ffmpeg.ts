@@ -1,5 +1,13 @@
-import { execFile } from "child_process";
-import { promisify } from "util";
+import {
+execFile
+}
+from "child_process";
+
+
+import {
+promisify
+}
+from "util";
 
 
 const exec =
@@ -8,15 +16,20 @@ promisify(execFile);
 
 
 export async function renderShort(
+
 video:string,
+
 audio:string,
+
 subtitle:string,
+
 output:string
+
 ){
 
 
 console.log(
-"Rendering with subtitles..."
+"Rendering final video..."
 );
 
 
@@ -24,7 +37,6 @@ console.log(
 await exec(
 "ffmpeg",
 [
-
 "-y",
 
 "-i",
@@ -35,7 +47,9 @@ audio,
 
 
 "-vf",
-`scale=1080:1920,subtitles=${subtitle}:force_style='FontSize=18,Bold=1'`,
+
+`scale=1080:1920,subtitles=${subtitle}:force_style='FontSize=18,Bold=1,Alignment=2,MarginV=150'`,
+
 
 "-map",
 "0:v",
@@ -43,14 +57,20 @@ audio,
 "-map",
 "1:a",
 
+
 "-c:v",
 "libx264",
 
 "-preset",
 "fast",
 
+
 "-c:a",
 "aac",
+
+"-b:a",
+"192k",
+
 
 "-shortest",
 
@@ -59,11 +79,6 @@ output
 ]
 );
 
-
-
-console.log(
-`Created ${output}`
-);
 
 
 return output;
