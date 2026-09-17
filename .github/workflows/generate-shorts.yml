@@ -5,6 +5,26 @@ on:
 
   workflow_dispatch:
 
+    inputs:
+
+      topic:
+
+        description: "Ana konu"
+
+        required: true
+
+        default: "teknoloji tarihi"
+
+
+
+      count:
+
+        description: "Kaç Shorts üretilecek"
+
+        required: true
+
+        default: "3"
+
 
 
 jobs:
@@ -22,28 +42,23 @@ jobs:
 
       PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
 
+      SHORTS_TOPIC: ${{ inputs.topic }}
+
+      SHORTS_COUNT: ${{ inputs.count }}
+
 
 
     steps:
 
 
-      - name: Checkout repository
+      - name: Checkout
+
         uses: actions/checkout@v4
 
 
 
-      - name: Restore AI Cache
-        uses: actions/cache@v4
+      - name: Setup Node
 
-        with:
-
-          path: output/cache
-
-          key: shorts-cache-${{ github.ref }}
-
-
-
-      - name: Setup Node.js
         uses: actions/setup-node@v4
 
         with:
@@ -53,6 +68,7 @@ jobs:
 
 
       - name: Setup Python
+
         uses: actions/setup-python@v5
 
         with:
@@ -62,6 +78,7 @@ jobs:
 
 
       - name: Install FFmpeg
+
         run: |
 
           sudo apt update
@@ -70,23 +87,24 @@ jobs:
 
 
 
-      - name: Install Node Dependencies
+      - name: Install packages
+
         run: |
 
           npm install
 
 
 
-      - name: Install Piper TTS
-        run: |
+      - name: Install Piper
 
-          python -m pip install --upgrade pip
+        run: |
 
           pip install piper-tts
 
 
 
-      - name: Download Turkish Piper Voice
+      - name: Download Voice
+
         run: |
 
           mkdir -p voices
@@ -97,61 +115,30 @@ jobs:
 
 
 
-      - name: Check Secrets
+      - name: Create folders
+
         run: |
-
-          echo "Checking API keys..."
-
-          if [ -z "$GEMINI_API_KEY" ]; then
-            echo "GEMINI_API_KEY missing"
-            exit 1
-          fi
-
-
-          if [ -z "$PEXELS_API_KEY" ]; then
-            echo "PEXELS_API_KEY missing"
-            exit 1
-          fi
-
-
-          echo "Secrets OK"
-
-
-
-      - name: Prepare folders
-        run: |
-
-          mkdir -p output/cache
-
-          mkdir -p output/assets
-
-          mkdir -p output/audio
 
           mkdir -p output/final
 
+          mkdir -p output/cache
 
 
-      - name: Generate 3 Shorts
+
+      - name: Generate Shorts
+
         run: |
 
           npm run generate
 
 
 
-      - name: Show Generated Files
-        run: |
+      - name: Upload videos
 
-          echo "===== OUTPUT FILES ====="
-
-          find output -type f
-
-
-
-      - name: Upload Generated Videos
         uses: actions/upload-artifact@v4
 
         with:
 
-          name: shorts-videos
+          name: shorts-output
 
           path: output/final/
