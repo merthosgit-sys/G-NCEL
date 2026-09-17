@@ -10,18 +10,16 @@ promisify
 from "util";
 
 
-import fs from "fs/promises";
-
 import {
-normalizeText
+prepareSpeechText
 }
-from "./normalize.js";
+from "./text-preprocessor.js";
 
 
 import {
-pickVoice
+getVoiceSettings
 }
-from "./voices.js";
+from "./director.js";
 
 
 
@@ -30,71 +28,76 @@ promisify(execFile);
 
 
 
-export async function generatePiperVoice(
+export async function generateVoice(
 
 text:string,
 
 output:string,
 
-voiceIndex:number
+scene:any
 
 ){
 
-
 console.log(
-"Generating voice..."
+"Generating Turkish voice..."
 );
 
 
 
 const clean =
-normalizeText(
+prepareSpeechText(
 text
 );
 
 
 
-await fs.writeFile(
-"output/audio/input.txt",
-clean,
-"utf8"
-);
-
-
-
-const voice =
-pickVoice(
-voiceIndex
-);
-
-
-
-console.log(
-"Voice:",
-voice.name
+const settings =
+getVoiceSettings(
+scene
 );
 
 
 
 await exec(
+
 "python",
+
 [
+
 "-m",
+
 "piper",
 
 "--model",
-voice.model,
 
-"--input_file",
-"output/audio/input.txt",
+"voices/tr_TR-dfki-medium.onnx",
 
 "--output_file",
-output
+
+output,
+
+"--length_scale",
+
+settings.speed,
+
+"--text",
+
+clean
+
 ]
+
+);
+
+
+
+console.log(
+"Voice generated:",
+output
 );
 
 
 
 return output;
+
 
 }
