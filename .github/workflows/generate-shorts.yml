@@ -43,7 +43,7 @@ jobs:
 
 
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
 
         with:
@@ -70,14 +70,12 @@ jobs:
 
 
 
-      - name: Install Node Dependencies
-        run: |
-
-          npm install
+      - name: Install Node Packages
+        run: npm install
 
 
 
-      - name: Install Piper TTS
+      - name: Install Piper
         run: |
 
           python -m pip install --upgrade pip
@@ -86,7 +84,7 @@ jobs:
 
 
 
-      - name: Download Turkish Piper Voice
+      - name: Download Turkish Voice Model
         run: |
 
           mkdir -p voices
@@ -97,38 +95,20 @@ jobs:
 
 
 
-      - name: Check API Keys
+      - name: Check Environment
         run: |
 
-          echo "Checking Gemini API..."
+          echo "Checking keys..."
 
-          if [ -z "$GEMINI_API_KEY" ]; then
+          test -n "$GEMINI_API_KEY"
 
-            echo "GEMINI_API_KEY missing"
+          test -n "$PEXELS_API_KEY"
 
-            exit 1
-
-          fi
+          echo "Environment OK"
 
 
 
-          echo "Checking Pexels API..."
-
-          if [ -z "$PEXELS_API_KEY" ]; then
-
-            echo "PEXELS_API_KEY missing"
-
-            exit 1
-
-          fi
-
-
-
-          echo "API keys OK"
-
-
-
-      - name: Prepare Output Folders
+      - name: Create folders
         run: |
 
           mkdir -p output/cache
@@ -142,22 +122,20 @@ jobs:
 
 
       - name: Generate Shorts Pipeline
+        run: npm run generate
+
+
+
+      - name: Debug Output
         run: |
 
-          npm run generate
-
-
-
-      - name: Show Generated Files
-        run: |
-
-          echo "===== OUTPUT ====="
+          echo "===== FILES ====="
 
           find output -type f
 
 
 
-      - name: Upload Final Shorts
+      - name: Upload Result
         uses: actions/upload-artifact@v4
 
         with:
