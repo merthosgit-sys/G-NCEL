@@ -1,11 +1,13 @@
 import "dotenv/config";
 
 
+import fs from "fs/promises";
+
+
 import {
 generateShortScript
 }
 from "../../../packages/ai-engine/src/gemini.js";
-
 
 
 import {
@@ -14,12 +16,10 @@ generateVoice
 from "../../../packages/voice-engine/src/index.js";
 
 
-
 import {
 fetchSceneVideo
 }
 from "../../../packages/media-engine/src/index.js";
-
 
 
 import {
@@ -29,80 +29,144 @@ from "../../../packages/render-engine/src/index.js";
 
 
 
+const COUNT = 3;
 
-async function main(){
 
+
+async function generateOne(
+index:number
+){
 
 console.log(
-"===== SHORTS FACTORY V2 ====="
+`===== SHORT ${index} START =====`
 );
 
 
 
-const raw =
+const script =
 await generateShortScript(
-"teknoloji tarihi"
+`teknoloji tarihi bölüm ${index}`
 );
 
 
 
 const data =
-JSON.parse(raw);
+JSON.parse(script);
 
 
 
-console.log(
-data.title
+const folder =
+`output/final/short-${index}`;
+
+
+
+await fs.mkdir(
+folder,
+{
+recursive:true
+}
 );
 
 
 
-const narration =
-data.narrationText;
-
-
-
-await generateVoice(
-narration,
-"output/audio/voice.wav"
-);
-
-
-
-const firstScene =
-data.scenes[0];
-
-
-
+const video =
 await fetchSceneVideo(
-firstScene.description,
-"output/assets/video.mp4"
+data.scenes[0].description,
+`${folder}/source.mp4`
+);
+
+
+
+const audio =
+await generateVoice(
+data.narrationText,
+`${folder}/voice.wav`
 );
 
 
 
 await renderShort(
-"output/assets/video.mp4",
-"output/audio/voice.wav",
-"output/final/short.mp4"
+video,
+audio,
+`${folder}/short.mp4`
 );
 
 
 
 console.log(
-"SHORT CREATED"
+`SHORT ${index} COMPLETED`
 );
+
+
+
+return `${folder}/short.mp4`;
+
+}
+
+
+
+async function main(){
+
+
+console.log(
+"===== SHORTS FACTORY BATCH ====="
+);
+
+
+
+const results = [];
+
+
+
+for(
+let i=1;
+i<=COUNT;
+i++
+){
+
+try{
+
+
+const result =
+await generateOne(i);
+
+
+results.push(result);
+
+
+}
+catch(error){
+
+console.error(
+`Short ${i} failed`,
+error
+);
+
+}
+
+
+}
+
+
+
+console.log(
+"===== ALL DONE ====="
+);
+
+
+console.log(results);
 
 
 
 }
 
 
+
 main()
 .catch(
-err=>{
+error=>{
 
-console.error(err);
+console.error(error);
 
 process.exit(1);
 
