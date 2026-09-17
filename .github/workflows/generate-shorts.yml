@@ -3,11 +3,17 @@ name: Generate Shorts V3
 on:
   workflow_dispatch:
 
+
 jobs:
 
   generate:
 
     runs-on: ubuntu-latest
+
+
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
 
 
     steps:
@@ -26,8 +32,22 @@ jobs:
         run: npm install
 
 
+      - name: Check API Keys
+        run: |
+          echo "Checking secrets..."
+
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "GEMINI missing"
+            exit 1
+          fi
+
+          if [ -z "$PEXELS_API_KEY" ]; then
+            echo "PEXELS missing"
+            exit 1
+          fi
+
+          echo "Secrets OK"
+
+
       - name: Generate AI Script
         run: npm run generate
-        env:
-  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-  PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
