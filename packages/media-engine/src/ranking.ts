@@ -1,25 +1,27 @@
-export function rankVideos(
- videos:any[]
+export function rankVideo(
+videos:any[]
 ){
 
- return videos.sort(
-  (a,b)=>{
+return videos
+.flatMap(
+(video:any)=>
+video.video_files.map(
+(file:any)=>({
 
-   const aScore =
-    (a.width / a.height)
-    +
-    a.duration;
+...file,
 
+score:
+(file.width < file.height ? 100 : 0)
++
+(file.height ?? 0)
 
-   const bScore =
-    (b.width / b.height)
-    +
-    b.duration;
-
-
-   return bScore-aScore;
-
-  }
- );
+})
+)
+)
+.sort(
+(a,b)=>
+b.score-a.score
+)
+[0];
 
 }
