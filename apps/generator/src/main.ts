@@ -1,5 +1,7 @@
 import "dotenv/config";
 
+import fs from "fs/promises";
+
 
 import {
 createTopics
@@ -28,19 +30,23 @@ from "../../../packages/render-engine/src/index.js";
 
 
 import {
-generateVoice
+generatePiperVoice,
+enhanceAudio
 }
 from "../../../packages/voice-engine/src/index.js";
-
-
-import fs from "fs/promises";
 
 
 
 const count =
 Number(
-process.env.SHORTS_COUNT ?? 3
+process.env.SHORTS_COUNT ?? "3"
 );
+
+
+
+const mainTopic =
+process.env.SHORTS_TOPIC ??
+"teknoloji";
 
 
 
@@ -56,8 +62,14 @@ index
 );
 
 
+console.log(
+"TOPIC:",
+topic
+);
 
-const raw =
+
+
+const rawScript =
 await generateShortScript(
 topic
 );
@@ -65,7 +77,9 @@ topic
 
 
 const data =
-JSON.parse(raw);
+JSON.parse(
+rawScript
+);
 
 
 
@@ -83,10 +97,39 @@ recursive:true
 
 
 
+await fs.writeFile(
+
+`${folder}/script.json`,
+
+JSON.stringify(
+data,
+null,
+2
+),
+
+"utf8"
+
+);
+
+
+
+console.log(
+"Downloading scenes..."
+);
+
+
+
 const clips =
 await fetchMultipleScenes(
 data.scenes,
 folder
+);
+
+
+
+console.log(
+"Clips:",
+clips
 );
 
 
@@ -103,16 +146,61 @@ merged
 
 
 
-const audio =
+console.log(
+"Video merged:",
+merged
+);
+
+
+
+//
+// VOICE
+//
+
+
+const rawAudio =
+`${folder}/voice-raw.wav`;
+
+
+
+const finalAudio =
 `${folder}/voice.wav`;
 
 
 
-await generateVoice(
+await generatePiperVoice(
+
 data.narrationText,
-audio
+
+rawAudio,
+
+index
+
 );
 
+
+
+await enhanceAudio(
+
+rawAudio,
+
+finalAudio
+
+);
+
+
+
+console.log(
+"Voice ready:",
+finalAudio
+);
+
+
+
+
+//
+// SUBTITLE
+//
 
 
 const subtitle =
@@ -121,45 +209,78 @@ const subtitle =
 
 
 await createSubtitle(
-audio,
+
+finalAudio,
+
 subtitle
-);
 
-
-
-const final =
-`output/final/short-${index}.mp4`;
-
-
-
-await renderShort(
-merged,
-audio,
-subtitle,
-final
 );
 
 
 
 console.log(
-"FINAL:",
-final
+"Subtitle ready:",
+subtitle
 );
 
 
 
+
+//
+// FINAL RENDER
+//
+
+
+const finalVideo =
+`output/final/short-${index}.mp4`;
+
+
+
+await renderShort(
+
+merged,
+
+finalAudio,
+
+subtitle,
+
+finalVideo
+
+);
+
+
+
+console.log(
+"FINAL VIDEO:",
+finalVideo
+);
+
+
+
+return finalVideo;
+
 }
+
+
 
 
 
 async function main(){
 
 
+console.log(
+"===== SHORTS FACTORY V3 ====="
+);
+
+
+
 const topics =
 await createTopics(
-process.env.SHORTS_TOPIC ??
-"teknoloji",
+
+mainTopic,
+
 count
+
 );
 
 
@@ -170,21 +291,75 @@ topics
 
 
 
+const results:string[]=[];
+
+
+
 for(
 let i=0;
 i<topics.length;
 i++
 ){
 
+try {
+
+
+const result =
 await generateVideo(
+
 topics[i],
+
 i+1
+
 );
 
-}
+
+results.push(
+result
+);
 
 
 }
+catch(error){
 
 
-main();
+console.error(
+`VIDEO ${i+1} FAILED`
+);
+
+
+console.error(
+error
+);
+
+
+}
+
+}
+
+
+
+console.log(
+"ALL DONE"
+);
+
+
+console.log(
+results
+);
+
+
+}
+
+
+
+main()
+.catch(
+error=>{
+
+console.error(error);
+
+process.exit(1);
+
+}
+);
