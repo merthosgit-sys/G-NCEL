@@ -1,19 +1,16 @@
-export type VoiceStyle =
-    | "excited"
-    | "documentary"
-    | "mysterious"
-    | "neutral";
+export type VoiceMood =
+    | "normal"
+    | "fast"
+    | "slow"
+    | "dramatic";
 
 
-
-export function selectVoiceStyle(
+export function getVoiceSettings(
     scene:any
-):VoiceStyle{
-
+){
 
     const text =
     `${scene.description ?? ""}`.toLowerCase();
-
 
 
     if(
@@ -22,35 +19,42 @@ export function selectVoiceStyle(
         text.includes("sır")
     ){
 
-        return "mysterious";
+        return {
+
+            mood:"dramatic",
+
+            speed:"0.90"
+
+        };
 
     }
-
 
 
     if(
         text.includes("hız") ||
         text.includes("yarış") ||
-        text.includes("rekor")
+        text.includes("spor")
     ){
 
-        return "excited";
+        return {
+
+            mood:"fast",
+
+            speed:"1.10"
+
+        };
 
     }
 
 
 
-    if(
-        text.includes("tarih") ||
-        text.includes("geçmiş")
-    ){
+    return {
 
-        return "documentary";
+        mood:"normal",
 
-    }
+        speed:"1.0"
 
+    };
 
-
-    return "neutral";
 
 }
