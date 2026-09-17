@@ -39,7 +39,7 @@ jobs:
 
           path: output/cache
 
-          key: shorts-ai-cache-${{ github.ref }}
+          key: shorts-cache-${{ github.ref }}
 
 
 
@@ -84,7 +84,7 @@ jobs:
 
 
 
-      - name: Download Turkish Voice Model
+      - name: Download Turkish Voice
         run: |
 
           mkdir -p voices
@@ -95,20 +95,18 @@ jobs:
 
 
 
-      - name: Check Environment
+      - name: Check Secrets
         run: |
-
-          echo "Checking keys..."
 
           test -n "$GEMINI_API_KEY"
 
           test -n "$PEXELS_API_KEY"
 
-          echo "Environment OK"
+          echo "Secrets OK"
 
 
 
-      - name: Create folders
+      - name: Prepare folders
         run: |
 
           mkdir -p output/cache
@@ -121,25 +119,18 @@ jobs:
 
 
 
-      - name: Generate Shorts Pipeline
-        run: npm run generate
-
-
-
-      - name: Debug Output
+      - name: Generate 3 Shorts
         run: |
 
-          echo "===== FILES ====="
-
-          find output -type f
+          npm run generate
 
 
 
-      - name: Upload Result
+      - name: Upload Only Videos
         uses: actions/upload-artifact@v4
 
         with:
 
-          name: shorts-final-video
+          name: shorts-videos
 
-          path: output/
+          path: output/final/**/short.mp4
