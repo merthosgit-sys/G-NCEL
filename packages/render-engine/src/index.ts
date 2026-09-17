@@ -1,10 +1,16 @@
 export {
- renderShort
+renderShort
 }
 from "./ffmpeg.js";
 
 
 export {
- createCaptionFile
+createCaptionFile
 }
 from "./captions.js";
+
+
+export {
+createSubtitle
+}
+from "./subtitle.js";
