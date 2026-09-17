@@ -16,19 +16,54 @@ const client =
 
 
 
+async function sleep(ms:number){
+
+  return new Promise(
+    resolve => setTimeout(resolve, ms)
+  );
+
+}
+
+
+
 export async function generateShortScript(
-  niche: string
-) {
+  niche:string
+){
 
 
-  const model =
-    client.getGenerativeModel({
-      model: "gemini-3.6-flash"
-    });
+  const models = [
+    "gemini-3.6-flash",
+    "gemini-2.5-flash"
+  ];
 
 
 
-  const prompt = `
+  let lastError;
+
+
+
+  for(
+    const modelName of models
+  ){
+
+    for(
+      let attempt = 1;
+      attempt <= 3;
+      attempt++
+    ){
+
+      try {
+
+
+        const model =
+          client.getGenerativeModel({
+            model:modelName
+          });
+
+
+
+        const result =
+          await model.generateContent(`
 
 Sen profesyonel YouTube Shorts içerik üreticisisin.
 
@@ -39,11 +74,11 @@ Kurallar:
 
 - Türkçe
 - 35 saniye
-- İlk 3 saniye çok güçlü hook
-- Merak uyandırıcı anlatım
+- Güçlü ilk 3 saniye
+- Yüksek izlenme tutma oranı
 - Belgesel tarzı
 
-Sadece JSON döndür:
+JSON formatında cevap ver:
 
 {
 "title":"",
@@ -52,16 +87,34 @@ Sadece JSON döndür:
 "scenes":[]
 }
 
-`;
+`);
+
+
+        return result.response.text();
+
+
+      }
+      catch(error){
+
+        lastError = error;
+
+        console.log(
+          `${modelName} deneme ${attempt} başarısız`
+        );
+
+
+        await sleep(
+          attempt * 3000
+        );
+
+      }
+
+    }
+
+  }
 
 
 
-  const result =
-    await model.generateContent(
-      prompt
-    );
-
-
-  return result.response.text();
+  throw lastError;
 
 }
