@@ -1,38 +1,64 @@
 import "dotenv/config";
 
+
 import {
-  generateShortScript
-} from "../../../packages/ai-engine/src/gemini.js";
+ generateShortScript
+}
+from "../../../packages/ai-engine/src/gemini.js";
 
 
-async function main() {
-
-  try {
-
-    const result =
-      await generateShortScript(
-        "teknoloji tarihi"
-      );
+import {
+ fetchSceneVideo
+}
+from "../../../packages/media-engine/src/index.js";
 
 
-    console.log(
-      "===== GENERATED SHORT ====="
-    );
+
+async function main(){
 
 
-    console.log(result);
+const script =
+await generateShortScript(
+"teknoloji tarihi"
+);
 
 
-  } catch (error) {
 
-    console.error(
-      "Generation failed:",
-      error
-    );
+console.log(
+"===== SCRIPT ====="
+);
 
-    process.exit(1);
-  }
+
+console.log(script);
+
+
+
+await fetchSceneVideo(
+"old computer laboratory",
+"output/assets/scene-01.mp4"
+);
+
+
+
+console.log(
+"Media pipeline completed"
+);
+
+
+
 }
 
 
-main();
+
+main()
+.catch(
+error=>{
+
+ console.error(
+  error
+ );
+
+ process.exit(1);
+
+}
+);
