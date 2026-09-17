@@ -1,20 +1,13 @@
 import {
  generateShortScript
 }
-from "@shorts/ai-engine";
+from "../../../packages/ai-engine/src/gemini.js";
 
 
-async function main(){
-
-const result =
+const output =
 await generateShortScript(
 "teknoloji tarihi"
 );
 
 
-console.log(result);
-
-}
-
-
-main();
+console.log(output);
