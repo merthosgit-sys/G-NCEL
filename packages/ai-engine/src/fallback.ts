@@ -1,48 +1,76 @@
 export function generateFallbackScript(
   niche: string
-){
+) {
 
 return JSON.stringify({
 
 title:
-`${niche} hakkında bilinmeyen gerçek`,
+`${niche} hakkında şaşırtıcı gerçekler`,
+
 
 hook:
 "Bu bilgiyi çoğu insan bilmiyor...",
 
 
-script:
+narrationText:
 `
-Bugün ${niche} hakkında şaşırtıcı bir bilgiye bakıyoruz.
+Bugün teknoloji tarihinin bilinmeyen bir hikayesine bakıyoruz.
 
-Geçmişte yaşanan bu olay teknoloji ve insan hayatını büyük ölçüde değiştirdi.
+İlk dönem bilgisayarlar bugünkü cihazlardan tamamen farklıydı.
 
-En ilginç nokta ise çoğu kişinin bu hikayeyi hiç duymamış olması.
+Bu dev makineler çok büyük alan kaplıyor ve sadece özel merkezlerde kullanılabiliyordu.
 
-Takip et, daha fazla ilginç bilgi keşfet.
+Zaman içinde teknoloji küçüldü, hızlandı ve hayatımızın vazgeçilmez bir parçası oldu.
+
+Bugün kullandığımız cihazların arkasında yüzlerce yıllık bir gelişim hikayesi var.
 `,
+
 
 scenes:[
 
 {
 description:
-"technology history documentary footage",
-duration:8
+"old computer laboratory with giant computers",
+duration:5
 },
+
 
 {
 description:
-"old computer laboratory",
-duration:8
+"vintage technology researchers working",
+duration:5
 },
+
 
 {
 description:
-"modern technology future",
-duration:8
+"first computers history documentary",
+duration:5
+},
+
+
+{
+description:
+"modern smartphone technology",
+duration:5
+},
+
+
+{
+description:
+"future artificial intelligence technology",
+duration:5
+},
+
+
+{
+description:
+"technology evolution timeline",
+duration:5
 }
 
 ]
+
 
 });
 
