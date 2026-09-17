@@ -1,14 +1,12 @@
 import {
-execFile
+    execFile
 }
 from "child_process";
 
-
 import {
-promisify
+    promisify
 }
 from "util";
-
 
 import fs from "fs/promises";
 
@@ -19,10 +17,9 @@ promisify(execFile);
 
 
 export async function createSubtitle(
-audio:string,
-output:string
+    audio:string,
+    output:string
 ){
-
 
 console.log(
 "Creating subtitles..."
@@ -51,10 +48,10 @@ audio,
 
 
 
-const file =
-"/tmp/subtitle/"
-+
-audio.split("/").pop()
+const filename =
+audio
+.split("/")
+.pop()
 ?.replace(
 ".wav",
 ".srt"
@@ -63,7 +60,14 @@ audio.split("/").pop()
 
 
 await fs.copyFile(
-file!,
+`/tmp/subtitle/${filename}`,
+output
+);
+
+
+
+console.log(
+"Subtitle created:",
 output
 );
 
