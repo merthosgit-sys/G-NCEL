@@ -4,29 +4,27 @@ on:
   workflow_dispatch:
 
 jobs:
-
   generate:
 
     runs-on: ubuntu-latest
 
     steps:
 
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
 
-      - name: Install
+      - name: Install dependencies
         run: npm install
 
 
       - name: Generate AI Script
         run: npm run generate
-
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
