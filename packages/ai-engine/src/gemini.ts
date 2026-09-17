@@ -1,20 +1,30 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI }
+from "@google/generative-ai";
 
 
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey =
+process.env.GEMINI_API_KEY;
+
 
 if (!apiKey) {
+
   throw new Error(
     "GEMINI_API_KEY missing"
   );
+
 }
 
 
 const client =
-new GoogleGenerativeAI(apiKey);
+new GoogleGenerativeAI(
+  apiKey
+);
 
 
-export async function generateShortScript(niche) {
+export async function generateShortScript(
+  niche
+) {
+
 
   const model =
     client.getGenerativeModel({
@@ -23,20 +33,21 @@ export async function generateShortScript(niche) {
 
 
   const prompt = `
-Sen profesyonel YouTube Shorts içerik üreticisisin.
 
-Konu:
+You are a professional YouTube Shorts writer.
+
+Topic:
 ${niche}
 
-Kurallar:
+Rules:
 
-- Türkçe yaz
-- 35 saniye
-- İlk 3 saniye güçlü hook
-- Merak uyandır
-- Bilgi videosu formatı
+- Turkish language
+- 35 seconds
+- Strong first 3 second hook
+- Documentary style
+- High retention
 
-Sadece JSON dön:
+Return JSON only:
 
 {
 "title":"",
@@ -44,12 +55,18 @@ Sadece JSON dön:
 "script":"",
 "scenes":[]
 }
+
 `;
 
 
-  const result =
-    await model.generateContent(prompt);
+  const response =
+    await model.generateContent(
+      prompt
+    );
 
 
-  return result.response.text();
+  return response
+    .response
+    .text();
+
 }
