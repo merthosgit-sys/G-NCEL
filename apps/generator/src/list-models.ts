@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 
 const apiKey =
@@ -6,25 +6,31 @@ process.env.GEMINI_API_KEY;
 
 
 if (!apiKey) {
+
   throw new Error(
     "GEMINI_API_KEY missing"
   );
+
 }
 
 
-const client =
-new GoogleGenerativeAI(apiKey);
+const ai =
+new GoogleGenAI({
+  apiKey
+});
 
 
 
 async function main(){
 
-  const models =
-    await client.listModels();
+
+  const result =
+    await ai.models.list();
 
 
-  for(
-    const model of models.models
+
+  for await (
+    const model of result
   ){
 
     console.log(
@@ -32,12 +38,14 @@ async function main(){
       model.name
     );
 
+
     console.log(
       "METHODS:",
-      model.supportedGenerationMethods
+      model.supportedActions
     );
 
   }
+
 
 }
 
