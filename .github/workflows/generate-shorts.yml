@@ -18,7 +18,7 @@ on:
 
       count:
 
-        description: "Kaç video üretilecek"
+        description: "Video sayısı"
 
         required: true
 
@@ -93,13 +93,11 @@ jobs:
 
             ~/.cache/torch
 
-            ~/.cache/piper
-
-          key: ai-models-${{ runner.os }}-v1
+          key: ai-cache-v1
 
           restore-keys: |
 
-            ai-models-${{ runner.os }}-
+            ai-cache-
 
 
 
@@ -113,7 +111,7 @@ jobs:
 
 
 
-      - name: Install Node Packages
+      - name: Install Node
 
         run: |
 
@@ -121,31 +119,27 @@ jobs:
 
 
 
-      - name: Install AI Packages
+      - name: Install Python AI
 
         run: |
 
           python -m pip install --upgrade pip
 
+
           pip install piper-tts
+
 
           pip install openai-whisper
 
-          pip install TTS
 
           pip install torch
 
-          pip install torchvision
 
           pip install torchaudio
 
-          pip install setuptools
-
-          pip install wheel
 
 
-
-      - name: Verify AI Tools
+      - name: Check Whisper
 
         run: |
 
@@ -166,26 +160,6 @@ jobs:
 
 
 
-      - name: Warmup XTTS Model
-
-        run: |
-
-          python - <<'PY'
-
-          from TTS.api import TTS
-
-          print("Loading XTTS model...")
-
-          TTS(
-            "tts_models/multilingual/multi-dataset/xtts_v2"
-          )
-
-          print("XTTS cached")
-
-          PY
-
-
-
       - name: Prepare folders
 
         run: |
@@ -203,14 +177,6 @@ jobs:
         run: |
 
           npm run generate
-
-
-
-      - name: Check Output
-
-        run: |
-
-          ls -R output
 
 
 
