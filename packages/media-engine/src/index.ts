@@ -25,12 +25,6 @@ description:string,
 output:string
 ){
 
-console.log(
-"Searching:",
-description
-);
-
-
 
 const videos =
 await searchVideos(
@@ -46,10 +40,10 @@ videos
 
 
 
-if(!selected?.link){
+if(!selected){
 
 throw new Error(
-`No suitable video: ${description}`
+`No video found ${description}`
 );
 
 }
@@ -58,13 +52,6 @@ throw new Error(
 
 await downloadVideo(
 selected.link,
-output
-);
-
-
-
-console.log(
-"Downloaded:",
 output
 );
 
@@ -82,6 +69,7 @@ scenes:any[],
 folder:string
 ){
 
+
 await fs.mkdir(
 folder,
 {
@@ -91,7 +79,7 @@ recursive:true
 
 
 
-const files:string[]=[];
+const result:string[]=[];
 
 
 
@@ -101,23 +89,25 @@ i<scenes.length;
 i++
 ){
 
-const output =
+
+const file =
 `${folder}/scene-${i}.mp4`;
+
 
 
 await fetchSceneVideo(
 scenes[i].description,
-output
+file
 );
 
 
 
-files.push(output);
+result.push(file);
 
 }
 
 
 
-return files;
+return result;
 
 }
