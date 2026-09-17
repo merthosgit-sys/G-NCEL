@@ -1,1 +1,4 @@
-export function generateVoice(){ return true; }
+export {
+ generateVoice
+}
+from "./piper.js";
