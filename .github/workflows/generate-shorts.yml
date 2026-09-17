@@ -43,7 +43,7 @@ jobs:
 
 
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
 
         with:
@@ -70,12 +70,14 @@ jobs:
 
 
 
-      - name: Install Node Packages
-        run: npm install
+      - name: Install Node Dependencies
+        run: |
+
+          npm install
 
 
 
-      - name: Install Piper
+      - name: Install Piper TTS
         run: |
 
           python -m pip install --upgrade pip
@@ -84,7 +86,7 @@ jobs:
 
 
 
-      - name: Download Turkish Voice
+      - name: Download Turkish Piper Voice
         run: |
 
           mkdir -p voices
@@ -98,9 +100,19 @@ jobs:
       - name: Check Secrets
         run: |
 
-          test -n "$GEMINI_API_KEY"
+          echo "Checking API keys..."
 
-          test -n "$PEXELS_API_KEY"
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "GEMINI_API_KEY missing"
+            exit 1
+          fi
+
+
+          if [ -z "$PEXELS_API_KEY" ]; then
+            echo "PEXELS_API_KEY missing"
+            exit 1
+          fi
+
 
           echo "Secrets OK"
 
@@ -126,11 +138,20 @@ jobs:
 
 
 
-      - name: Upload Only Videos
+      - name: Show Generated Files
+        run: |
+
+          echo "===== OUTPUT FILES ====="
+
+          find output -type f
+
+
+
+      - name: Upload Generated Videos
         uses: actions/upload-artifact@v4
 
         with:
 
           name: shorts-videos
 
-          path: output/final/**/short.mp4
+          path: output/final/
