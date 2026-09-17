@@ -1,6 +1,5 @@
 import "dotenv/config";
 
-
 import fs from "fs/promises";
 
 
@@ -23,7 +22,8 @@ from "../../../packages/media-engine/src/index.js";
 
 
 import {
-renderShort
+renderShort,
+createSubtitle
 }
 from "../../../packages/render-engine/src/index.js";
 
@@ -37,13 +37,14 @@ async function generateOne(
 index:number
 ){
 
+
 console.log(
 `===== SHORT ${index} START =====`
 );
 
 
 
-const script =
+const raw =
 await generateShortScript(
 `teknoloji tarihi bölüm ${index}`
 );
@@ -51,7 +52,7 @@ await generateShortScript(
 
 
 const data =
-JSON.parse(script);
+JSON.parse(raw);
 
 
 
@@ -72,7 +73,7 @@ recursive:true
 const video =
 await fetchSceneVideo(
 data.scenes[0].description,
-`${folder}/source.mp4`
+`${folder}/video.mp4`
 );
 
 
@@ -85,21 +86,28 @@ data.narrationText,
 
 
 
+const subtitle =
+await createSubtitle(
+data.narrationText,
+`${folder}/subtitle.srt`
+);
+
+
+
 await renderShort(
 video,
 audio,
+subtitle,
 `${folder}/short.mp4`
 );
 
 
 
 console.log(
-`SHORT ${index} COMPLETED`
+`SHORT ${index} DONE`
 );
 
 
-
-return `${folder}/short.mp4`;
 
 }
 
@@ -114,48 +122,21 @@ console.log(
 
 
 
-const results = [];
-
-
-
 for(
 let i=1;
 i<=COUNT;
 i++
 ){
 
-try{
-
-
-const result =
 await generateOne(i);
-
-
-results.push(result);
-
-
-}
-catch(error){
-
-console.error(
-`Short ${i} failed`,
-error
-);
-
-}
-
 
 }
 
 
 
 console.log(
-"===== ALL DONE ====="
+"ALL SHORTS CREATED"
 );
-
-
-console.log(results);
-
 
 
 }
