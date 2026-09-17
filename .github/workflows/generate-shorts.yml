@@ -9,17 +9,16 @@ on:
 
       topic:
 
-        description: "Ana konu"
+        description: "Video konusu"
 
         required: true
 
-        default: "teknoloji tarihi"
-
+        default: "arabalar hakkında ilginç bilgiler"
 
 
       count:
 
-        description: "Kaç Shorts üretilecek"
+        description: "Kaç video üretilecek"
 
         required: true
 
@@ -51,7 +50,8 @@ jobs:
     steps:
 
 
-      - name: Checkout
+
+      - name: Checkout repository
 
         uses: actions/checkout@v4
 
@@ -87,7 +87,7 @@ jobs:
 
 
 
-      - name: Install packages
+      - name: Install Node dependencies
 
         run: |
 
@@ -95,15 +95,31 @@ jobs:
 
 
 
-      - name: Install Piper
+      - name: Install Python AI tools
 
         run: |
 
+          python -m pip install --upgrade pip
+
           pip install piper-tts
 
+          pip install openai-whisper
+
+          pip install setuptools
+
+          pip install wheel
 
 
-      - name: Download Voice
+
+      - name: Verify Whisper
+
+        run: |
+
+          python -m whisper --help
+
+
+
+      - name: Prepare Piper voice
 
         run: |
 
@@ -115,13 +131,15 @@ jobs:
 
 
 
-      - name: Create folders
+      - name: Prepare folders
 
         run: |
 
           mkdir -p output/final
 
-          mkdir -p output/cache
+          mkdir -p output/work
+
+          mkdir -p output/audio
 
 
 
@@ -133,12 +151,22 @@ jobs:
 
 
 
-      - name: Upload videos
+      - name: Check output
+
+        run: |
+
+          ls -R output
+
+
+
+      - name: Upload final videos
 
         uses: actions/upload-artifact@v4
 
         with:
 
-          name: shorts-output
+          name: shorts-final
 
-          path: output/final/
+          path: output/final/*.mp4
+
+          if-no-files-found: error
