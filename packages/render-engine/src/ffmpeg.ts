@@ -8,73 +8,62 @@ promisify(execFile);
 
 
 export async function renderShort(
- video:string,
- audio:string,
- output:string
+video:string,
+audio:string,
+subtitle:string,
+output:string
 ){
 
+
 console.log(
- "Starting FFmpeg render..."
+"Rendering with subtitles..."
 );
 
 
 
 await exec(
- "ffmpeg",
- [
-  "-y",
+"ffmpeg",
+[
 
-  "-i",
-  video,
+"-y",
 
-  "-i",
-  audio,
+"-i",
+video,
 
-
-  "-vf",
-  [
-   "scale=1080:1920",
-   "crop=1080:1920",
-   "format=yuv420p"
-  ].join(","),
+"-i",
+audio,
 
 
-  "-map",
-  "0:v:0",
+"-vf",
+`scale=1080:1920,subtitles=${subtitle}:force_style='FontSize=18,Bold=1'`,
 
-  "-map",
-  "1:a:0",
+"-map",
+"0:v",
 
+"-map",
+"1:a",
 
-  "-c:v",
-  "libx264",
+"-c:v",
+"libx264",
 
-  "-preset",
-  "fast",
+"-preset",
+"fast",
 
-  "-crf",
-  "23",
+"-c:a",
+"aac",
 
+"-shortest",
 
-  "-c:a",
-  "aac",
+output
 
-  "-b:a",
-  "192k",
-
-
-  "-shortest",
-
-  output
- ]
+]
 );
 
 
 
 console.log(
- `Rendered: ${output}`
+`Created ${output}`
 );
-
 
 
 return output;
