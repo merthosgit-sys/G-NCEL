@@ -19,8 +19,20 @@ import {
 from "../../../packages/voice-engine/src/index.js";
 
 
+import {
+ renderShort
+}
+from "../../../packages/render-engine/src/index.js";
+
+
 
 async function main(){
+
+
+console.log(
+"===== SHORTS FACTORY START ====="
+);
+
 
 
 const script =
@@ -31,30 +43,42 @@ await generateShortScript(
 
 
 console.log(
-"===== SCRIPT ====="
+"AI SCRIPT:"
 );
+
 
 console.log(script);
 
 
 
-await generateVoice(
- script,
- "output/voice.wav"
+const video =
+await fetchSceneVideo(
+"old computer laboratory",
+"output/assets/video.mp4"
 );
 
 
 
-await fetchSceneVideo(
- "old computer laboratory",
- "output/assets/scene-01.mp4"
+const audio =
+await generateVoice(
+script,
+"output/audio/voice.wav"
+);
+
+
+
+await renderShort(
+video,
+audio,
+"output/final/short.mp4"
 );
 
 
 
 console.log(
-"Voice + Media completed"
+"===== SHORT CREATED ====="
 );
+
 
 
 }
@@ -65,9 +89,11 @@ main()
 .catch(
 error=>{
 
-console.error(error);
+ console.error(
+  error
+ );
 
-process.exit(1);
+ process.exit(1);
 
 }
 );
