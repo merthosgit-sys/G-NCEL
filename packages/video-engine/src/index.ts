@@ -1,1 +1,4 @@
-export function renderVideo(){ return true; }
+export {
+ generateVoice
+}
+from "./piper.js";
