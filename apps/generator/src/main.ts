@@ -1,323 +1,190 @@
 import "dotenv/config";
 
+
+import {
+createTopics
+}
+from "../../../packages/ai-engine/src/planner.js";
+
+
+import {
+generateShortScript
+}
+from "../../../packages/ai-engine/src/gemini.js";
+
+
+import {
+fetchMultipleScenes
+}
+from "../../../packages/media-engine/src/index.js";
+
+
+import {
+concatVideos,
+createSubtitle,
+renderShort
+}
+from "../../../packages/render-engine/src/index.js";
+
+
+import {
+generateVoice
+}
+from "../../../packages/voice-engine/src/index.js";
+
+
 import fs from "fs/promises";
-
-
-import {
-    createTopics
-} from "../../../packages/ai-engine/src/planner.js";
-
-
-import {
-    generateShortScript
-} from "../../../packages/ai-engine/src/gemini.js";
-
-
-import {
-    fetchMultipleScenes
-} from "../../../packages/media-engine/src/index.js";
-
-
-import {
-    concatVideos
-} from "../../../packages/render-engine/src/index.js";
 
 
 
 const count =
 Number(
-    process.env.SHORTS_COUNT ?? "3"
+process.env.SHORTS_COUNT ?? 3
 );
 
 
 
-const mainTopic =
-process.env.SHORTS_TOPIC ??
-"teknoloji tarihi";
-
-
-
 async function generateVideo(
-    topic:string,
-    index:number
+topic:string,
+index:number
 ){
 
 
-    console.log(
-        "\n========================"
-    );
+console.log(
+"VIDEO:",
+index
+);
 
 
-    console.log(
-        `VIDEO ${index} START`
-    );
 
+const raw =
+await generateShortScript(
+topic
+);
 
-    console.log(
-        "TOPIC:",
-        topic
-    );
 
 
+const data =
+JSON.parse(raw);
 
-    const rawScript =
-    await generateShortScript(
-        topic
-    );
 
 
+const folder =
+`output/work/${index}`;
 
-    console.log(
-        "SCRIPT GENERATED"
-    );
 
 
+await fs.mkdir(
+folder,
+{
+recursive:true
+}
+);
 
-    let data:any;
 
 
+const clips =
+await fetchMultipleScenes(
+data.scenes,
+folder
+);
 
-    try {
 
 
-        data =
-        JSON.parse(
-            rawScript
-        );
+const merged =
+`${folder}/merged.mp4`;
 
 
-    } catch {
 
+await concatVideos(
+clips,
+merged
+);
 
-        console.error(
-            "Invalid AI JSON:"
-        );
 
 
-        console.log(
-            rawScript
-        );
+const audio =
+`${folder}/voice.wav`;
 
 
-        throw new Error(
-            "AI response JSON invalid"
-        );
 
-    }
+await generateVoice(
+data.narrationText,
+audio
+);
 
 
 
-    if(
-        !data.scenes ||
-        !Array.isArray(data.scenes)
-    ){
+const subtitle =
+`${folder}/subtitle.srt`;
 
-        throw new Error(
-            "No scenes found"
-        );
 
-    }
 
+await createSubtitle(
+audio,
+subtitle
+);
 
 
-    console.log(
-        "SCENES:",
-        data.scenes.length
-    );
 
+const final =
+`output/final/short-${index}.mp4`;
 
 
-    const workDir =
-    `output/work/${index}`;
 
+await renderShort(
+merged,
+audio,
+subtitle,
+final
+);
 
 
-    await fs.mkdir(
-        workDir,
-        {
-            recursive:true
-        }
-    );
 
+console.log(
+"FINAL:",
+final
+);
 
 
-    await fs.writeFile(
-
-        `${workDir}/script.json`,
-
-        JSON.stringify(
-            data,
-            null,
-            2
-        ),
-
-        "utf-8"
-
-    );
-
-
-
-    const clips =
-    await fetchMultipleScenes(
-        data.scenes,
-        workDir
-    );
-
-
-
-    console.log(
-        "DOWNLOADED CLIPS:"
-    );
-
-
-    console.log(
-        clips
-    );
-
-
-
-    const mergedVideo =
-    `${workDir}/merged.mp4`;
-
-
-
-    await concatVideos(
-        clips,
-        mergedVideo
-    );
-
-
-
-    console.log(
-        "MERGED VIDEO:"
-    );
-
-
-    console.log(
-        mergedVideo
-    );
-
-
-
-    return mergedVideo;
 
 }
-
-
 
 
 
 async function main(){
 
 
-    console.log(
-        "===== SHORTS FACTORY V3 ====="
-    );
-
-
-    console.log(
-        "MAIN TOPIC:",
-        mainTopic
-    );
-
-
-    console.log(
-        "COUNT:",
-        count
-    );
+const topics =
+await createTopics(
+process.env.SHORTS_TOPIC ??
+"teknoloji",
+count
+);
 
 
 
-    const topics =
-    await createTopics(
-        mainTopic,
-        count
-    );
+console.log(
+topics
+);
 
 
 
-    console.log(
-        "GENERATED TOPICS:"
-    );
+for(
+let i=0;
+i<topics.length;
+i++
+){
 
+await generateVideo(
+topics[i],
+i+1
+);
 
-    console.log(
-        topics
-    );
-
-
-
-    const results:string[] = [];
-
-
-
-    for(
-        let i = 0;
-        i < topics.length;
-        i++
-    ){
-
-
-        try {
-
-
-            const video =
-            await generateVideo(
-                topics[i],
-                i + 1
-            );
-
-
-            results.push(
-                video
-            );
-
-
-
-        } catch(error){
-
-
-            console.error(
-                `VIDEO ${i+1} FAILED`
-            );
-
-
-            console.error(
-                error
-            );
-
-
-        }
-
-
-    }
-
-
-
-    console.log(
-        "\n===== COMPLETE ====="
-    );
-
-
-    console.log(
-        results
-    );
-
+}
 
 
 }
 
 
-
-main()
-.catch(
-    error => {
-
-        console.error(
-            error
-        );
-
-        process.exit(1);
-
-    }
-);
+main();
