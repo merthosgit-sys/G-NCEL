@@ -1,4 +1,15 @@
-{"name":"shorts-factory-v3","private":true,"scripts":{"generate":"echo generate"}}
-"dependencies": {
-  "@google/generative-ai": "^0.21.0"
+{
+  "name": "shorts-factory-v3",
+  "version": "1.0.0",
+  "private": true,
+
+  "type": "module",
+
+  "scripts": {
+    "generate": "node apps/generator/src/main.js"
+  },
+
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0"
+  }
 }
