@@ -6,6 +6,7 @@
 
   "scripts": {
     "generate": "tsx apps/generator/src/main.ts",
+    "models": "tsx apps/generator/src/list-models.ts",
     "typecheck": "tsc --noEmit"
   },
 
