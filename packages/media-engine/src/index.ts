@@ -1,17 +1,17 @@
 import {
- searchVideos
+searchVideos
 }
 from "./pexels.js";
 
 
 import {
- rankVideos
+rankVideo
 }
 from "./ranking.js";
 
 
 import {
- downloadVideo
+downloadVideo
 }
 from "./downloader.js";
 
@@ -21,83 +21,103 @@ import fs from "fs/promises";
 
 
 export async function fetchSceneVideo(
- scene:string,
- output:string
+description:string,
+output:string
 ){
 
- console.log(
-  `Searching: ${scene}`
- );
-
-
- const videos =
-  await searchVideos(scene);
+console.log(
+"Searching:",
+description
+);
 
 
 
- if(!videos.length){
-
-  throw new Error(
-   `No video found: ${scene}`
-  );
-
- }
+const videos =
+await searchVideos(
+description
+);
 
 
 
- const ranked =
-  rankVideos(videos);
+const selected =
+rankVideo(
+videos
+);
 
 
 
- const selected =
-  ranked[0];
+if(!selected?.link){
+
+throw new Error(
+`No suitable video: ${description}`
+);
+
+}
 
 
 
- const file =
- selected.video_files
- .filter(
-  (v:any)=>
-   v.height > v.width
- )
- .sort(
-  (a:any,b:any)=>
-   b.height-a.height
- )[0];
+await downloadVideo(
+selected.link,
+output
+);
 
 
 
- if(!file){
-
-  throw new Error(
-   "Portrait video missing"
-  );
-
- }
+console.log(
+"Downloaded:",
+output
+);
 
 
 
- await fs.mkdir(
-  "output/assets",
-  {
-   recursive:true
-  }
- );
+return output;
+
+}
 
 
 
- await downloadVideo(
-  file.link,
-  output
- );
+
+export async function fetchMultipleScenes(
+scenes:any[],
+folder:string
+){
+
+await fs.mkdir(
+folder,
+{
+recursive:true
+}
+);
 
 
- console.log(
-  `Downloaded: ${output}`
- );
+
+const files:string[]=[];
 
 
- return output;
+
+for(
+let i=0;
+i<scenes.length;
+i++
+){
+
+const output =
+`${folder}/scene-${i}.mp4`;
+
+
+await fetchSceneVideo(
+scenes[i].description,
+output
+);
+
+
+
+files.push(output);
+
+}
+
+
+
+return files;
 
 }
