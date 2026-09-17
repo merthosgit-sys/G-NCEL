@@ -45,6 +45,10 @@ jobs:
 
       SHORTS_COUNT: ${{ inputs.count }}
 
+      HF_HOME: ~/.cache/huggingface
+
+      TORCH_HOME: ~/.cache/torch
+
 
 
     steps:
@@ -77,6 +81,28 @@ jobs:
 
 
 
+      - name: Cache AI Models
+
+        uses: actions/cache@v4
+
+        with:
+
+          path: |
+
+            ~/.cache/huggingface
+
+            ~/.cache/torch
+
+            ~/.cache/piper
+
+          key: ai-models-${{ runner.os }}-v1
+
+          restore-keys: |
+
+            ai-models-${{ runner.os }}-
+
+
+
       - name: Install FFmpeg
 
         run: |
@@ -95,39 +121,31 @@ jobs:
 
 
 
-      - name: Install AI Voice Packages
+      - name: Install AI Packages
 
         run: |
 
           python -m pip install --upgrade pip
 
-
           pip install piper-tts
-
 
           pip install openai-whisper
 
-
           pip install TTS
-
 
           pip install torch
 
-
           pip install torchvision
-
 
           pip install torchaudio
 
-
           pip install setuptools
-
 
           pip install wheel
 
 
 
-      - name: Check Whisper
+      - name: Verify AI Tools
 
         run: |
 
@@ -135,7 +153,7 @@ jobs:
 
 
 
-      - name: Prepare Piper Voice
+      - name: Download Piper Voice
 
         run: |
 
@@ -145,6 +163,26 @@ jobs:
           python -m piper.download_voices \
             tr_TR-dfki-medium \
             --data-dir voices
+
+
+
+      - name: Warmup XTTS Model
+
+        run: |
+
+          python - <<'PY'
+
+          from TTS.api import TTS
+
+          print("Loading XTTS model...")
+
+          TTS(
+            "tts_models/multilingual/multi-dataset/xtts_v2"
+          )
+
+          print("XTTS cached")
+
+          PY
 
 
 
@@ -168,7 +206,7 @@ jobs:
 
 
 
-      - name: Debug Output
+      - name: Check Output
 
         run: |
 
@@ -176,7 +214,7 @@ jobs:
 
 
 
-      - name: Upload Final Videos
+      - name: Upload Videos
 
         uses: actions/upload-artifact@v4
 
