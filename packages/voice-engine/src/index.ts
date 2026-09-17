@@ -1,22 +1,16 @@
 export {
-generateXTTS
-}
-from "./xtts.js";
-
-
-export {
-generatePiperVoice
+generateVoice
 }
 from "./piper.js";
 
 
 export {
-enhanceAudio
+enhanceVoice
 }
-from "./normalize.js";
+from "./audio-enhancer.js";
 
 
 export {
-selectVoiceStyle
+getVoiceSettings
 }
 from "./director.js";
