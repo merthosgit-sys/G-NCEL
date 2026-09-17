@@ -1,124 +1,141 @@
 import { GoogleGenAI } from "@google/genai";
 
 import {
- readCache,
- saveCache
+readCache,
+saveCache
 }
 from "./cache.js";
+
+
+import {
+generateFallbackScript
+}
+from "./fallback.js";
 
 
 const apiKey =
 process.env.GEMINI_API_KEY;
 
 
-if(!apiKey){
-
- throw new Error(
-  "GEMINI_API_KEY missing"
- );
-
-}
-
 
 const ai =
 new GoogleGenAI({
- apiKey
+apiKey
 });
 
 
 
 export async function generateShortScript(
- niche:string
+niche:string
 ){
 
 
- const cacheKey =
- niche
- .toLowerCase()
- .replace(
-  /[^a-z0-9]/g,
-  "-"
- );
-
-
- const cached =
- await readCache(
-  cacheKey
- );
-
-
- if(cached){
-
-  console.log(
-   "Using cached AI script"
-  );
-
-  return cached;
-
- }
+const key =
+niche
+.toLowerCase()
+.replace(
+/[^a-z0-9]/g,
+"-"
+);
 
 
 
- console.log(
-  "Generating new AI script"
- );
+const cached =
+await readCache(key);
 
 
 
- const response =
- await ai.models.generateContent({
+if(cached){
 
-  model:
-   "gemini-3.6-flash",
+console.log(
+"Using cached AI script"
+);
+
+return cached;
+
+}
 
 
-  contents:
+
+try{
+
+
+console.log(
+"Generating new AI script"
+);
+
+
+
+const response =
+await ai.models.generateContent({
+
+model:
+"gemini-3.6-flash",
+
+
+contents:
 `
-Türkçe YouTube Shorts senaryosu oluştur.
+Create Turkish YouTube Shorts JSON.
 
-Konu:
+Topic:
 ${niche}
 
-
-Kurallar:
-
-- 35 saniye
-- Güçlü hook
-- Bilgi videosu
-- Yüksek izlenme
-
-
-JSON:
+Return:
 
 {
 "title":"",
 "hook":"",
 "script":"",
-"scenes":[
- {
-  "description":"",
-  "duration":5
- }
-]
+"scenes":[]
 }
-
 `
 
- });
+});
 
 
 
- const text =
- response.text ?? "";
+const text =
+response.text ?? "";
 
 
 
- await saveCache(
-  cacheKey,
-  text
- );
+await saveCache(
+key,
+text
+);
 
 
- return text;
+return text;
+
+
+
+}
+catch(error){
+
+
+console.log(
+"Gemini unavailable, using fallback"
+);
+
+
+const fallback =
+generateFallbackScript(
+niche
+);
+
+
+
+await saveCache(
+key,
+fallback
+);
+
+
+
+return fallback;
+
+
+}
+
 
 }
