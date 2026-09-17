@@ -13,6 +13,12 @@ import {
 from "../../../packages/media-engine/src/index.js";
 
 
+import {
+ generateVoice
+}
+from "../../../packages/voice-engine/src/index.js";
+
+
 
 async function main(){
 
@@ -28,22 +34,27 @@ console.log(
 "===== SCRIPT ====="
 );
 
-
 console.log(script);
 
 
 
+await generateVoice(
+ script,
+ "output/voice.wav"
+);
+
+
+
 await fetchSceneVideo(
-"old computer laboratory",
-"output/assets/scene-01.mp4"
+ "old computer laboratory",
+ "output/assets/scene-01.mp4"
 );
 
 
 
 console.log(
-"Media pipeline completed"
+"Voice + Media completed"
 );
-
 
 
 }
@@ -54,11 +65,9 @@ main()
 .catch(
 error=>{
 
- console.error(
-  error
- );
+console.error(error);
 
- process.exit(1);
+process.exit(1);
 
 }
 );
