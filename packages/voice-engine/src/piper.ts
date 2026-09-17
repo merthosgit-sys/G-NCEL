@@ -8,38 +8,41 @@ promisify(execFile);
 
 
 export async function generateVoice(
-  text:string,
-  output:string
+ text:string,
+ output:string
 ){
 
-  console.log(
-    "Generating Turkish voice..."
-  );
+console.log(
+"Generating Turkish voice..."
+);
 
 
-  await exec(
-    "python",
-    [
-      "-m",
-      "piper",
 
-      "--model",
-      "tr_TR-dfki-medium",
+await exec(
+"python",
+[
+"-m",
+"piper",
 
-      "--output_file",
-      output
-    ],
-    {
-      input:text
-    }
-  );
+"--model",
+"voices/tr_TR-dfki-medium.onnx",
 
-
-  console.log(
-    `Voice created: ${output}`
-  );
+"--output_file",
+output
+],
+{
+input:text
+}
+);
 
 
-  return output;
+
+console.log(
+`Voice created: ${output}`
+);
+
+
+
+return output;
 
 }
