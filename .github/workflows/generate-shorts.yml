@@ -2,12 +2,18 @@ name: Generate Shorts V3
 
 on:
   workflow_dispatch:
-- name: Install dependencies
-  run: npm install
 
+jobs:
+  test:
+    runs-on: ubuntu-latest
 
-- name: Generate script
-  run: npm run generate
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  env:
-    GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      - name: Test workflow
+        run: |
+          echo "======================"
+          echo "Shorts Factory V3"
+          echo "Workflow aktif"
+          echo "======================"
