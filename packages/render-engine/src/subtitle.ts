@@ -1,13 +1,5 @@
-import {
-    execFile
-}
-from "child_process";
-
-import {
-    promisify
-}
-from "util";
-
+import { execFile } from "child_process";
+import { promisify } from "util";
 import fs from "fs/promises";
 
 
@@ -21,58 +13,76 @@ export async function createSubtitle(
     output:string
 ){
 
-console.log(
-"Creating subtitles..."
-);
+    console.log(
+        "Creating subtitles..."
+    );
+
+
+    await fs.mkdir(
+        "/tmp/subtitle",
+        {
+            recursive:true
+        }
+    );
+
+
+    await exec(
+        "python",
+        [
+            "-m",
+            "whisper",
+
+            audio,
+
+            "--language",
+            "Turkish",
+
+            "--task",
+            "transcribe",
+
+            "--output_format",
+            "srt",
+
+            "--output_dir",
+            "/tmp/subtitle"
+        ]
+    );
 
 
 
-await exec(
-"whisper",
-[
-audio,
-
-"--language",
-"Turkish",
-
-"--task",
-"transcribe",
-
-"--output_format",
-"srt",
-
-"--output_dir",
-"/tmp/subtitle"
-]
-);
+    const name =
+    audio
+    .split("/")
+    .pop()
+    ?.replace(
+        ".wav",
+        ".srt"
+    );
 
 
 
-const filename =
-audio
-.split("/")
-.pop()
-?.replace(
-".wav",
-".srt"
-);
+    if(!name){
+
+        throw new Error(
+            "Subtitle filename missing"
+        );
+
+    }
 
 
 
-await fs.copyFile(
-`/tmp/subtitle/${filename}`,
-output
-);
+    await fs.copyFile(
+        `/tmp/subtitle/${name}`,
+        output
+    );
 
 
-
-console.log(
-"Subtitle created:",
-output
-);
-
+    console.log(
+        "Subtitle ready:",
+        output
+    );
 
 
-return output;
+    return output;
 
 }
