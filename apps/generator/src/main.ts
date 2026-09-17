@@ -30,8 +30,15 @@ from "../../../packages/render-engine/src/index.js";
 
 
 import {
+
+generateXTTS,
+
 generatePiperVoice,
-enhanceAudio
+
+enhanceAudio,
+
+selectVoiceStyle
+
 }
 from "../../../packages/voice-engine/src/index.js";
 
@@ -51,9 +58,17 @@ process.env.SHORTS_TOPIC ??
 
 
 async function generateVideo(
+
 topic:string,
+
 index:number
+
 ){
+
+
+console.log(
+"======================"
+);
 
 
 console.log(
@@ -121,15 +136,11 @@ console.log(
 
 const clips =
 await fetchMultipleScenes(
+
 data.scenes,
+
 folder
-);
 
-
-
-console.log(
-"Clips:",
-clips
 );
 
 
@@ -140,8 +151,11 @@ const merged =
 
 
 await concatVideos(
+
 clips,
+
 merged
+
 );
 
 
@@ -150,6 +164,8 @@ console.log(
 "Video merged:",
 merged
 );
+
+
 
 
 
@@ -162,9 +178,53 @@ const rawAudio =
 `${folder}/voice-raw.wav`;
 
 
-
 const finalAudio =
 `${folder}/voice.wav`;
+
+
+
+const voiceStyle =
+selectVoiceStyle(
+data.scenes?.[0] ?? {}
+);
+
+
+
+console.log(
+"Voice style:",
+voiceStyle
+);
+
+
+
+try {
+
+
+await generateXTTS(
+
+data.narrationText,
+
+rawAudio,
+
+voiceStyle
+
+);
+
+
+console.log(
+"XTTS voice created"
+);
+
+
+
+}
+
+catch(error){
+
+
+console.log(
+"XTTS failed, fallback Piper"
+);
 
 
 
@@ -177,6 +237,10 @@ rawAudio,
 index
 
 );
+
+
+
+}
 
 
 
@@ -194,6 +258,7 @@ console.log(
 "Voice ready:",
 finalAudio
 );
+
 
 
 
@@ -226,8 +291,9 @@ subtitle
 
 
 
+
 //
-// FINAL RENDER
+// FINAL VIDEO
 //
 
 
@@ -291,20 +357,16 @@ topics
 
 
 
-const results:string[]=[];
-
-
-
 for(
 let i=0;
 i<topics.length;
 i++
 ){
 
+
 try {
 
 
-const result =
 await generateVideo(
 
 topics[i],
@@ -314,17 +376,13 @@ i+1
 );
 
 
-results.push(
-result
-);
-
-
 }
+
 catch(error){
 
 
 console.error(
-`VIDEO ${i+1} FAILED`
+`VIDEO ${i+1} ERROR`
 );
 
 
@@ -340,13 +398,9 @@ error
 
 
 console.log(
-"ALL DONE"
+"DONE"
 );
 
-
-console.log(
-results
-);
 
 
 }
