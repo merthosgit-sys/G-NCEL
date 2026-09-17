@@ -2,27 +2,31 @@ import "dotenv/config";
 
 
 import {
- generateShortScript
+generateShortScript
 }
 from "../../../packages/ai-engine/src/gemini.js";
 
 
-import {
- fetchSceneVideo
-}
-from "../../../packages/media-engine/src/index.js";
-
 
 import {
- generateVoice
+generateVoice
 }
 from "../../../packages/voice-engine/src/index.js";
 
 
+
 import {
- renderShort
+fetchSceneVideo
+}
+from "../../../packages/media-engine/src/index.js";
+
+
+
+import {
+renderShort
 }
 from "../../../packages/render-engine/src/index.js";
+
 
 
 
@@ -30,53 +34,63 @@ async function main(){
 
 
 console.log(
-"===== SHORTS FACTORY START ====="
+"===== SHORTS FACTORY V2 ====="
 );
 
 
 
-const script =
+const raw =
 await generateShortScript(
 "teknoloji tarihi"
 );
 
 
 
+const data =
+JSON.parse(raw);
+
+
+
 console.log(
-"AI SCRIPT:"
-);
-
-
-console.log(script);
-
-
-
-const video =
-await fetchSceneVideo(
-"old computer laboratory",
-"output/assets/video.mp4"
+data.title
 );
 
 
 
-const audio =
+const narration =
+data.narrationText;
+
+
+
 await generateVoice(
-script,
+narration,
 "output/audio/voice.wav"
 );
 
 
 
+const firstScene =
+data.scenes[0];
+
+
+
+await fetchSceneVideo(
+firstScene.description,
+"output/assets/video.mp4"
+);
+
+
+
 await renderShort(
-video,
-audio,
+"output/assets/video.mp4",
+"output/audio/voice.wav",
 "output/final/short.mp4"
 );
 
 
 
 console.log(
-"===== SHORT CREATED ====="
+"SHORT CREATED"
 );
 
 
@@ -84,16 +98,13 @@ console.log(
 }
 
 
-
 main()
 .catch(
-error=>{
+err=>{
 
- console.error(
-  error
- );
+console.error(err);
 
- process.exit(1);
+process.exit(1);
 
 }
 );
