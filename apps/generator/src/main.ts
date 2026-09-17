@@ -1,17 +1,37 @@
-import { generateShortScript }
-from "../../../packages/ai-engine/src/gemini.js";
+import "dotenv/config";
+
+import {
+  generateShortScript
+} from "../../../packages/ai-engine/src/gemini.js";
 
 
-async function main(){
+async function main() {
 
-  const script =
-    await generateShortScript(
-      "teknoloji tarihi"
+  try {
+
+    const result =
+      await generateShortScript(
+        "teknoloji tarihi"
+      );
+
+
+    console.log(
+      "===== GENERATED SHORT ====="
     );
 
 
-  console.log(script);
+    console.log(result);
 
+
+  } catch (error) {
+
+    console.error(
+      "Generation failed:",
+      error
+    );
+
+    process.exit(1);
+  }
 }
 
 
