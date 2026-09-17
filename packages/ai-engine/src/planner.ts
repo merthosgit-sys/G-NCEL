@@ -3,8 +3,10 @@ import { GoogleGenAI } from "@google/genai";
 
 const ai =
 new GoogleGenAI({
- apiKey:
- process.env.GEMINI_API_KEY
+
+apiKey:
+process.env.GEMINI_API_KEY
+
 });
 
 
@@ -15,7 +17,7 @@ count:number
 ){
 
 
-try{
+try {
 
 
 const result =
@@ -26,36 +28,42 @@ model:
 
 
 contents:
+
 `
 
-You are a YouTube Shorts topic planner.
+Sen profesyonel YouTube Shorts konu planlayıcısısın.
 
-Main topic:
+
+Ana konu:
 
 ${topic}
 
 
-Create ${count} completely different Shorts ideas.
-
-Rules:
-
-- Each idea must be unique.
-- No repeated subjects.
-- High curiosity.
-- Suitable for 40 second videos.
+${count} tane birbirinden tamamen farklı video konusu üret.
 
 
-Return only JSON array:
+Kurallar:
+
+- Aynı başlığı tekrar etme
+- Her video farklı hikaye olsun
+- Merak uyandırıcı olsun
+- Shorts formatına uygun olsun
+
+
+Sadece JSON array döndür.
+
+
+Örnek:
 
 [
-"topic 1",
-"topic 2"
+"Ferrari'nin bilinmeyen kuruluş hikayesi",
+"Elektrikli arabaların gizli başlangıcı",
+"Dünyanın en pahalı arabasının hikayesi"
 ]
 
 `
 
 });
-
 
 
 return JSON.parse(
@@ -65,19 +73,21 @@ result.text ?? "[]"
 
 
 }
-catch{
+catch {
 
 
-return Array.from(
-{
-length:count
-},
-(_,i)=>
-`${topic} ilginç bilgi ${i+1}`
-);
+return [
+
+`${topic} hakkında bilinmeyen hikayeler`,
+
+`${topic} tarihindeki şaşırtıcı olaylar`,
+
+`${topic} dünyasından ilginç gerçekler`
+
+]
+.slice(0,count);
 
 
 }
-
 
 }
