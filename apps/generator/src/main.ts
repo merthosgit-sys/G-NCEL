@@ -1,115 +1,33 @@
 import "dotenv/config";
 
-import fs from "fs/promises";
+
+import {
+
+createTopics
+
+}
+from "../../../packages/ai-engine/src/planner.js";
 
 
 import {
+
 generateShortScript
+
 }
 from "../../../packages/ai-engine/src/gemini.js";
 
 
-import {
-generateVoice
-}
-from "../../../packages/voice-engine/src/index.js";
 
-
-import {
-fetchSceneVideo
-}
-from "../../../packages/media-engine/src/index.js";
-
-
-import {
-renderShort,
-createSubtitle
-}
-from "../../../packages/render-engine/src/index.js";
-
-
-
-const COUNT = 3;
-
-
-
-async function generateOne(
-index:number
-){
-
-
-console.log(
-`===== SHORT ${index} START =====`
+const count =
+Number(
+process.env.SHORTS_COUNT ?? 3
 );
 
 
 
-const raw =
-await generateShortScript(
-`teknoloji tarihi bölüm ${index}`
-);
-
-
-
-const data =
-JSON.parse(raw);
-
-
-
-const folder =
-`output/final/short-${index}`;
-
-
-
-await fs.mkdir(
-folder,
-{
-recursive:true
-}
-);
-
-
-
-const video =
-await fetchSceneVideo(
-data.scenes[0].description,
-`${folder}/video.mp4`
-);
-
-
-
-const audio =
-await generateVoice(
-data.narrationText,
-`${folder}/voice.wav`
-);
-
-
-
-const subtitle =
-await createSubtitle(
-data.narrationText,
-`${folder}/subtitle.srt`
-);
-
-
-
-await renderShort(
-video,
-audio,
-subtitle,
-`${folder}/short.mp4`
-);
-
-
-
-console.log(
-`SHORT ${index} DONE`
-);
-
-
-
-}
+const mainTopic =
+process.env.SHORTS_TOPIC ??
+"teknoloji";
 
 
 
@@ -117,39 +35,59 @@ async function main(){
 
 
 console.log(
-"===== SHORTS FACTORY BATCH ====="
+"===== TOPIC PLANNER ====="
+);
+
+
+
+const topics =
+await createTopics(
+mainTopic,
+count
+);
+
+
+
+console.log(
+topics
 );
 
 
 
 for(
-let i=1;
-i<=COUNT;
+let i=0;
+i<topics.length;
 i++
 ){
 
-await generateOne(i);
 
-}
+console.log(
+`
+VIDEO ${i+1}
+TOPIC:
+${topics[i]}
+`
+);
+
+
+
+const script =
+await generateShortScript(
+topics[i]
+);
 
 
 
 console.log(
-"ALL SHORTS CREATED"
+script
 );
+
 
 
 }
 
 
-
-main()
-.catch(
-error=>{
-
-console.error(error);
-
-process.exit(1);
-
 }
-);
+
+
+main();
