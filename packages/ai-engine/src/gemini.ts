@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 
+
 import {
 readCache,
 saveCache
@@ -11,6 +12,7 @@ import {
 generateFallbackScript
 }
 from "./fallback.js";
+
 
 
 const apiKey =
@@ -25,12 +27,13 @@ apiKey
 
 
 
+
 export async function generateShortScript(
 niche:string
 ){
 
 
-const key =
+const cacheKey =
 niche
 .toLowerCase()
 .replace(
@@ -41,14 +44,16 @@ niche
 
 
 const cached =
-await readCache(key);
+await readCache(
+cacheKey
+);
 
 
 
 if(cached){
 
 console.log(
-"Using cached AI script"
+"Using cached script"
 );
 
 return cached;
@@ -61,12 +66,12 @@ try{
 
 
 console.log(
-"Generating new AI script"
+"Generating AI script"
 );
 
 
 
-const response =
+const result =
 await ai.models.generateContent({
 
 model:
@@ -75,19 +80,44 @@ model:
 
 contents:
 `
-Create Turkish YouTube Shorts JSON.
 
-Topic:
+Sen profesyonel YouTube Shorts senaristisin.
+
+
+Konu:
 ${niche}
 
-Return:
+
+Kurallar:
+
+- Türkçe
+- 35-45 saniye
+- İnsan gibi konuşma dili
+- İlk 3 saniye güçlü giriş
+- Belgesel tarzı
+- Seslendirme için doğal metin
+
+
+Sadece JSON döndür:
+
 
 {
 "title":"",
 "hook":"",
-"script":"",
-"scenes":[]
+"narrationText":"",
+"scenes":[
+
+{
+"description":"",
+"duration":5
 }
+
+]
+
+}
+
+6 sahne oluştur.
+
 `
 
 });
@@ -95,14 +125,15 @@ Return:
 
 
 const text =
-response.text ?? "";
+result.text ?? "";
 
 
 
 await saveCache(
-key,
+cacheKey,
 text
 );
+
 
 
 return text;
@@ -110,11 +141,11 @@ return text;
 
 
 }
-catch(error){
+catch{
 
 
 console.log(
-"Gemini unavailable, using fallback"
+"Gemini fallback"
 );
 
 
@@ -126,7 +157,7 @@ niche
 
 
 await saveCache(
-key,
+cacheKey,
 fallback
 );
 
