@@ -1,104 +1,74 @@
+import {
+execFile
+}
+from "child_process";
+
+
+import {
+promisify
+}
+from "util";
+
+
 import fs from "fs/promises";
+
+
+const exec =
+promisify(execFile);
 
 
 
 export async function createSubtitle(
-text:string,
+audio:string,
 output:string
 ){
 
-const words =
-text
-.split(" ");
+
+console.log(
+"Creating subtitles..."
+);
 
 
 
-let current =
-0;
+await exec(
+"whisper",
+[
+audio,
 
+"--language",
+"Turkish",
 
-let srt =
-"";
+"--task",
+"transcribe",
 
+"--output_format",
+"srt",
 
-for(
-let i=0;
-i<words.length;
-i+=4
-){
-
-
-const chunk =
-words
-.slice(
-i,
-i+4
-)
-.join(" ");
+"--output_dir",
+"/tmp/subtitle"
+]
+);
 
 
 
-const start =
-formatTime(current);
-
-
-current += 2;
-
-
-const end =
-formatTime(current);
-
-
-
-srt +=
-`${i/4+1}
-${start} --> ${end}
-${chunk}
-
-`;
-
-}
+const file =
+"/tmp/subtitle/"
++
+audio.split("/").pop()
+?.replace(
+".wav",
+".srt"
+);
 
 
 
-await fs.writeFile(
-output,
-srt,
-"utf-8"
+await fs.copyFile(
+file!,
+output
 );
 
 
 
 return output;
-
-}
-
-
-
-function formatTime(
-seconds:number
-){
-
-const date =
-new Date(
-seconds*1000
-);
-
-
-return (
-"00:" +
-String(
-date.getUTCMinutes()
-)
-.padStart(2,"0")
-+
-":" +
-String(
-date.getUTCSeconds()
-)
-.padStart(2,"0")
-+
-",000"
-);
 
 }
