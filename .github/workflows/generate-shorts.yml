@@ -71,7 +71,9 @@ jobs:
 
 
       - name: Install Node Dependencies
-        run: npm install
+        run: |
+
+          npm install
 
 
 
@@ -84,23 +86,21 @@ jobs:
 
 
 
-      - name: Prepare folders
+      - name: Download Turkish Piper Voice
         run: |
 
-          mkdir -p output/cache
+          mkdir -p voices
 
-          mkdir -p output/assets
-
-          mkdir -p output/audio
-
-          mkdir -p output/final
+          python -m piper.download_voices \
+            tr_TR-dfki-medium \
+            --data-dir voices
 
 
 
       - name: Check API Keys
         run: |
 
-          echo "Checking Gemini..."
+          echo "Checking Gemini API..."
 
           if [ -z "$GEMINI_API_KEY" ]; then
 
@@ -112,7 +112,7 @@ jobs:
 
 
 
-          echo "Checking Pexels..."
+          echo "Checking Pexels API..."
 
           if [ -z "$PEXELS_API_KEY" ]; then
 
@@ -128,23 +128,36 @@ jobs:
 
 
 
-      - name: Generate Shorts
-
-        run: npm run generate
-
-
-
-      - name: Show Output
-
+      - name: Prepare Output Folders
         run: |
 
-          echo "===== GENERATED FILES ====="
+          mkdir -p output/cache
+
+          mkdir -p output/assets
+
+          mkdir -p output/audio
+
+          mkdir -p output/final
+
+
+
+      - name: Generate Shorts Pipeline
+        run: |
+
+          npm run generate
+
+
+
+      - name: Show Generated Files
+        run: |
+
+          echo "===== OUTPUT ====="
 
           find output -type f
 
 
 
-      - name: Upload Shorts Artifact
+      - name: Upload Final Shorts
         uses: actions/upload-artifact@v4
 
         with:
