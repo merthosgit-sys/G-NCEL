@@ -18,7 +18,7 @@ on:
 
       count:
 
-        description: "Kaç video üretilecek"
+        description: "Video sayısı"
 
         required: true
 
@@ -51,13 +51,13 @@ jobs:
 
 
 
-      - name: Checkout repository
+      - name: Checkout
 
         uses: actions/checkout@v4
 
 
 
-      - name: Setup Node
+      - name: Node Setup
 
         uses: actions/setup-node@v4
 
@@ -67,7 +67,7 @@ jobs:
 
 
 
-      - name: Setup Python
+      - name: Python Setup
 
         uses: actions/setup-python@v5
 
@@ -87,7 +87,7 @@ jobs:
 
 
 
-      - name: Install Node dependencies
+      - name: Install Node Packages
 
         run: |
 
@@ -95,7 +95,7 @@ jobs:
 
 
 
-      - name: Install Python AI tools
+      - name: Install Python AI Tools
 
         run: |
 
@@ -111,7 +111,7 @@ jobs:
 
 
 
-      - name: Verify Whisper
+      - name: Install Whisper Check
 
         run: |
 
@@ -119,14 +119,20 @@ jobs:
 
 
 
-      - name: Prepare Piper voice
+      - name: Download Turkish Voices
 
         run: |
 
           mkdir -p voices
 
+
           python -m piper.download_voices \
             tr_TR-dfki-medium \
+            --data-dir voices
+
+
+          python -m piper.download_voices \
+            tr_TR-fettah-medium \
             --data-dir voices
 
 
@@ -151,7 +157,7 @@ jobs:
 
 
 
-      - name: Check output
+      - name: Show Output
 
         run: |
 
@@ -159,7 +165,7 @@ jobs:
 
 
 
-      - name: Upload final videos
+      - name: Upload Final Videos
 
         uses: actions/upload-artifact@v4
 
