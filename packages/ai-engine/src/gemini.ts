@@ -16,7 +16,14 @@ const client =
 
 
 
-async function sleep(ms:number){
+const MODELS = [
+  "gemini-3.6-flash",
+  "gemini-3.6-flash-lite"
+];
+
+
+
+function wait(ms:number){
 
   return new Promise(
     resolve => setTimeout(resolve, ms)
@@ -31,33 +38,31 @@ export async function generateShortScript(
 ){
 
 
-  const models = [
-    "gemini-3.6-flash",
-    "gemini-2.5-flash"
-  ];
-
-
-
   let lastError;
 
 
 
-  for(
-    const modelName of models
-  ){
+  for (const modelName of MODELS) {
 
-    for(
+
+    for (
       let attempt = 1;
       attempt <= 3;
       attempt++
-    ){
+    ) {
+
 
       try {
 
 
+        console.log(
+          `Trying model: ${modelName} attempt: ${attempt}`
+        );
+
+
         const model =
           client.getGenerativeModel({
-            model:modelName
+            model: modelName
           });
 
 
@@ -65,26 +70,35 @@ export async function generateShortScript(
         const result =
           await model.generateContent(`
 
-Sen profesyonel YouTube Shorts içerik üreticisisin.
+You are a professional YouTube Shorts creator.
 
-Konu:
+Create a Turkish YouTube Shorts script.
+
+Topic:
 ${niche}
 
-Kurallar:
 
-- Türkçe
-- 35 saniye
-- Güçlü ilk 3 saniye
-- Yüksek izlenme tutma oranı
-- Belgesel tarzı
+Rules:
 
-JSON formatında cevap ver:
+- Turkish language
+- 35 seconds
+- Strong hook in first 3 seconds
+- High retention
+- Documentary style
+
+
+Return only JSON:
 
 {
 "title":"",
 "hook":"",
 "script":"",
-"scenes":[]
+"scenes":[
+ {
+  "description":"",
+  "duration":0
+ }
+]
 }
 
 `);
@@ -93,17 +107,19 @@ JSON formatında cevap ver:
         return result.response.text();
 
 
-      }
-      catch(error){
+
+      } catch(error) {
+
 
         lastError = error;
 
+
         console.log(
-          `${modelName} deneme ${attempt} başarısız`
+          `${modelName} failed attempt ${attempt}`
         );
 
 
-        await sleep(
+        await wait(
           attempt * 3000
         );
 
