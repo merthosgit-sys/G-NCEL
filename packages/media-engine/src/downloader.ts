@@ -1,44 +1,38 @@
 import axios from "axios";
-import fs from "fs";
+import fs from "fs/promises";
+import path from "path";
 
 
 export async function downloadVideo(
- url:string,
- output:string
+url:string,
+output:string
 ){
 
- const response =
- await axios.get(
-  url,
-  {
-   responseType:"stream"
-  }
- );
+await fs.mkdir(
+path.dirname(output),
+{
+recursive:true
+}
+);
 
 
- const writer =
- fs.createWriteStream(
-  output
- );
+const response =
+await axios.get(
+url,
+{
+responseType:"arraybuffer"
+}
+);
 
 
- response.data.pipe(writer);
+
+await fs.writeFile(
+output,
+response.data
+);
 
 
- return new Promise(
-  (resolve,reject)=>{
 
-   writer.on(
-    "finish",
-    resolve
-   );
-
-   writer.on(
-    "error",
-    reject
-   );
-
-  }
- );
+return output;
 
 }
