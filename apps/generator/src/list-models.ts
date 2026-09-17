@@ -6,11 +6,9 @@ process.env.GEMINI_API_KEY;
 
 
 if (!apiKey) {
-
   throw new Error(
     "GEMINI_API_KEY missing"
   );
-
 }
 
 
@@ -25,11 +23,16 @@ async function main(){
     await client.listModels();
 
 
-  for (const model of models.models){
+  for(
+    const model of models.models
+  ){
 
     console.log(
       "MODEL:",
-      model.name,
+      model.name
+    );
+
+    console.log(
       "METHODS:",
       model.supportedGenerationMethods
     );
