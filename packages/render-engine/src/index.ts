@@ -1,10 +1,16 @@
 export {
-renderShort
+    renderShort
 }
 from "./ffmpeg.js";
 
 
 export {
-concatVideos
+    concatVideos
 }
 from "./concat.js";
+
+
+export {
+    addZoomEffect
+}
+from "./effects.js";
