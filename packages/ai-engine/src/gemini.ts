@@ -1,16 +1,23 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey =
+  process.env.GEMINI_API_KEY;
 
 
 if (!apiKey) {
-  throw new Error("GEMINI_API_KEY missing");
+
+  throw new Error(
+    "GEMINI_API_KEY missing"
+  );
+
 }
 
 
-const client =
-  new GoogleGenerativeAI(apiKey);
+const ai =
+  new GoogleGenAI({
+    apiKey
+  });
 
 
 
@@ -19,28 +26,31 @@ export async function generateShortScript(
 ) {
 
 
-  const model =
-    client.getGenerativeModel({
-      model: "gemini-1.5-flash"
-    });
+  const response =
+    await ai.models.generateContent({
+
+      model:
+        "gemini-3.6-flash",
 
 
-
-  const prompt = `
-
-Türkçe YouTube Shorts senaristi gibi davran.
+      contents:
+`
+Sen profesyonel YouTube Shorts içerik üreticisisin.
 
 Konu:
 ${niche}
 
 Kurallar:
 
+- Türkçe
 - 35 saniye
-- İlk 3 saniye güçlü giriş
-- Merak uyandırıcı anlatım
+- İlk 3 saniye güçlü hook
+- Bilgilendirici
 - Belgesel tarzı
+- İzleyiciyi sonuna kadar tutacak anlatım
 
-Sadece JSON dön:
+
+Sadece JSON döndür:
 
 {
 "title":"",
@@ -53,17 +63,15 @@ Sadece JSON dön:
  }
 ]
 }
+`
 
-`;
-
-
-
-  const result =
-    await model.generateContent(
-      prompt
-    );
+    });
 
 
-  return result.response.text();
+
+  return (
+    response.text ??
+    ""
+  );
 
 }
