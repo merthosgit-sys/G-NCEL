@@ -4,13 +4,46 @@ import {
 } from "./index.js";
 
 
+export type SceneVoiceStyle =
+    | "excited"
+    | "documentary"
+    | "mysterious"
+    | "neutral";
+
+
+export interface SceneVoiceOptions {
+
+    text: string;
+
+    output: string;
+
+    style?: SceneVoiceStyle;
+
+    sceneIndex: number;
+}
+
+
+
 export async function generateSceneVoice(
-    text:string,
-    output:string,
-    style:string
-){
+    options: SceneVoiceOptions
+): Promise<string> {
+
+
+    const {
+        text,
+        output,
+        style = "neutral",
+        sceneIndex
+    } = options;
+
+
+    console.log(
+        `[VOICE] Scene ${sceneIndex} generating`
+    );
+
 
     try {
+
 
         await generateXTTS(
             text,
@@ -18,15 +51,34 @@ export async function generateSceneVoice(
             style
         );
 
-    } catch {
+
+        console.log(
+            `[VOICE] Scene ${sceneIndex} XTTS success`
+        );
+
+
+    } catch(error) {
+
+
+        console.error(
+            `[VOICE] Scene ${sceneIndex} XTTS failed, using Piper fallback`
+        );
+
 
         await generatePiperVoice(
             text,
             output,
-            0
+            sceneIndex
+        );
+
+
+        console.log(
+            `[VOICE] Scene ${sceneIndex} Piper success`
         );
 
     }
 
+
     return output;
+
 }
