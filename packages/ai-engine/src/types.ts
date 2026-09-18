@@ -1,21 +1,25 @@
 export interface ShortScene {
-    id: number;
 
-    visualPrompt: string;
+    id:number;
 
-    narration: string;
+    visualPrompt:string;
 
-    estimatedSeconds: number;
+    narration:string;
+
+    estimatedSeconds:number;
+
 }
+
 
 
 export interface ShortScript {
 
-    title: string;
+    title:string;
 
-    hook: string;
+    hook:string;
 
-    scenes: ShortScene[];
+    scenes:ShortScene[];
 
-    fullNarration: string;
+    fullNarration:string;
+
 }
