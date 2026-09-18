@@ -1,14 +1,21 @@
 export {
+    generateXTTS
+}
+from "./xtts.js";
+
+
+export {
     generateVoice
 }
 from "./piper.js";
 
 
-// eski isim desteği
+// Eski main.ts uyumluluğu
 export {
     generateVoice as generatePiperVoice
 }
 from "./piper.js";
+
 
 
 export {
@@ -17,14 +24,22 @@ export {
 from "./audio-enhancer.js";
 
 
-// eski isim desteği
+// Eski isim uyumluluğu
 export {
     enhanceVoice as enhanceAudio
 }
 from "./audio-enhancer.js";
 
 
+
 export {
-    getVoiceSettings
+    selectVoiceStyle
 }
 from "./director.js";
+
+
+
+export {
+    generateSceneVoice
+}
+from "./scene-voice.js";
