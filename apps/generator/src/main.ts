@@ -4,49 +4,71 @@ import fs from "fs/promises";
 
 
 import {
-createTopics
+    createTopics
 }
 from "../../../packages/ai-engine/src/planner.js";
 
 
 import {
-generateShortScript
+    generateShortScript
 }
 from "../../../packages/ai-engine/src/gemini.js";
 
 
 import {
-fetchMultipleScenes
+    fetchMultipleScenes
 }
 from "../../../packages/media-engine/src/index.js";
 
 
 import {
-concatVideos,
-createSubtitle,
-renderShort
+    concatVideos,
+    createSubtitle,
+    renderShort
 }
 from "../../../packages/render-engine/src/index.js";
 
 
 import {
-
-generateXTTS,
-
-generatePiperVoice,
-
-enhanceAudio,
-
-selectVoiceStyle
-
+    generateSceneVoice,
+    selectVoiceStyle,
+    enhanceAudio
 }
 from "../../../packages/voice-engine/src/index.js";
 
 
 
+interface ScriptScene {
+
+    id:number;
+
+    visualPrompt:string;
+
+    narration:string;
+
+    estimatedSeconds:number;
+
+}
+
+
+
+interface ShortData {
+
+    title:string;
+
+    hook:string;
+
+    scenes:ScriptScene[];
+
+    fullNarration:string;
+
+}
+
+
+
 const count =
 Number(
-process.env.SHORTS_COUNT ?? "3"
+    process.env.SHORTS_COUNT ?? "3"
 );
 
 
@@ -57,275 +79,280 @@ process.env.SHORTS_TOPIC ??
 
 
 
+
+
 async function generateVideo(
-
-topic:string,
-
-index:number
-
+    topic:string,
+    index:number
 ){
 
 
-console.log(
-"======================"
-);
+    console.log(
+        "======================"
+    );
 
 
-console.log(
-"VIDEO:",
-index
-);
+    console.log(
+        "VIDEO:",
+        index
+    );
 
 
-console.log(
-"TOPIC:",
-topic
-);
-
-
-
-const rawScript =
-await generateShortScript(
-topic
-);
+    console.log(
+        "TOPIC:",
+        topic
+    );
 
 
 
-const data =
-JSON.parse(
-rawScript
-);
+    const rawScript =
+    await generateShortScript(
+        topic
+    );
 
 
 
-const folder =
-`output/work/${index}`;
+    const data =
+    JSON.parse(
+        rawScript
+    ) as ShortData;
 
 
 
-await fs.mkdir(
-folder,
-{
-recursive:true
+    const folder =
+    `output/work/${index}`;
+
+
+
+    await fs.mkdir(
+        folder,
+        {
+            recursive:true
+        }
+    );
+
+
+
+    await fs.writeFile(
+        `${folder}/script.json`,
+        JSON.stringify(
+            data,
+            null,
+            2
+        ),
+        "utf8"
+    );
+
+
+
+    console.log(
+        "Downloading scenes..."
+    );
+
+
+
+    const clips =
+    await fetchMultipleScenes(
+        data.scenes,
+        folder
+    );
+
+
+
+    const merged =
+    `${folder}/merged.mp4`;
+
+
+
+    await concatVideos(
+        clips,
+        merged
+    );
+
+
+
+    console.log(
+        "Video merged:",
+        merged
+    );
+
+
+
+    /*
+        SCENE VOICES
+    */
+
+
+    const sceneAudios:string[] = [];
+
+
+
+    for(
+        const scene of data.scenes
+    ){
+
+
+        const sceneAudio =
+        `${folder}/scene-${scene.id}.wav`;
+
+
+
+        const style =
+        selectVoiceStyle(
+            {
+                description:
+                scene.narration
+            }
+        );
+
+
+
+        await generateSceneVoice(
+            {
+                text:
+                scene.narration,
+
+                output:
+                sceneAudio,
+
+                style,
+
+                sceneIndex:
+                scene.id
+            }
+        );
+
+
+
+        sceneAudios.push(
+            sceneAudio
+        );
+
+    }
+
+
+
+
+    /*
+        TODO:
+        Scene audio merge
+        burada yapılacak.
+        
+        Şimdilik ilk çalışan
+        pipeline için bütün narration
+        fallback kullanıyoruz.
+    */
+
+
+
+    const rawAudio =
+    `${folder}/voice-raw.wav`;
+
+
+
+    const finalAudio =
+    `${folder}/voice.wav`;
+
+
+
+    const voiceStyle =
+    selectVoiceStyle(
+        {
+            description:
+            data.fullNarration
+        }
+    );
+
+
+
+    await generateSceneVoice(
+        {
+            text:
+            data.fullNarration,
+
+            output:
+            rawAudio,
+
+            style:
+            voiceStyle,
+
+            sceneIndex:
+            0
+        }
+    );
+
+
+
+    await enhanceAudio(
+        rawAudio,
+        finalAudio
+    );
+
+
+
+    console.log(
+        "Voice ready:",
+        finalAudio
+    );
+
+
+
+    /*
+        SUBTITLE
+    */
+
+
+
+    const subtitle =
+    `${folder}/subtitle.srt`;
+
+
+
+    await createSubtitle(
+        finalAudio,
+        subtitle
+    );
+
+
+
+    console.log(
+        "Subtitle ready:",
+        subtitle
+    );
+
+
+
+    /*
+        FINAL RENDER
+    */
+
+
+
+    const finalVideo =
+    `output/final/short-${index}.mp4`;
+
+
+
+    await renderShort(
+        merged,
+        finalAudio,
+        subtitle,
+        finalVideo
+    );
+
+
+
+    console.log(
+        "FINAL VIDEO:",
+        finalVideo
+    );
+
+
+
+    return finalVideo;
+
 }
-);
 
-
-
-await fs.writeFile(
-
-`${folder}/script.json`,
-
-JSON.stringify(
-data,
-null,
-2
-),
-
-"utf8"
-
-);
-
-
-
-console.log(
-"Downloading scenes..."
-);
-
-
-
-const clips =
-await fetchMultipleScenes(
-
-data.scenes,
-
-folder
-
-);
-
-
-
-const merged =
-`${folder}/merged.mp4`;
-
-
-
-await concatVideos(
-
-clips,
-
-merged
-
-);
-
-
-
-console.log(
-"Video merged:",
-merged
-);
-
-
-
-
-
-//
-// VOICE
-//
-
-
-const rawAudio =
-`${folder}/voice-raw.wav`;
-
-
-const finalAudio =
-`${folder}/voice.wav`;
-
-
-
-const voiceStyle =
-selectVoiceStyle(
-data.scenes?.[0] ?? {}
-);
-
-
-
-console.log(
-"Voice style:",
-voiceStyle
-);
-
-
-
-try {
-
-
-await generateXTTS(
-
-data.narrationText,
-
-rawAudio,
-
-voiceStyle
-
-);
-
-
-console.log(
-"XTTS voice created"
-);
-
-
-
-}
-
-catch(error){
-
-
-console.log(
-"XTTS failed, fallback Piper"
-);
-
-
-
-await generatePiperVoice(
-
-data.narrationText,
-
-rawAudio,
-
-index
-
-);
-
-
-
-}
-
-
-
-await enhanceAudio(
-
-rawAudio,
-
-finalAudio
-
-);
-
-
-
-console.log(
-"Voice ready:",
-finalAudio
-);
-
-
-
-
-
-//
-// SUBTITLE
-//
-
-
-const subtitle =
-`${folder}/subtitle.srt`;
-
-
-
-await createSubtitle(
-
-finalAudio,
-
-subtitle
-
-);
-
-
-
-console.log(
-"Subtitle ready:",
-subtitle
-);
-
-
-
-
-
-//
-// FINAL VIDEO
-//
-
-
-const finalVideo =
-`output/final/short-${index}.mp4`;
-
-
-
-await renderShort(
-
-merged,
-
-finalAudio,
-
-subtitle,
-
-finalVideo
-
-);
-
-
-
-console.log(
-"FINAL VIDEO:",
-finalVideo
-);
-
-
-
-return finalVideo;
-
-}
 
 
 
@@ -334,86 +361,81 @@ return finalVideo;
 async function main(){
 
 
-console.log(
-"===== SHORTS FACTORY V3 ====="
-);
+    console.log(
+        "===== SHORTS FACTORY V4 ====="
+    );
 
 
 
-const topics =
-await createTopics(
-
-mainTopic,
-
-count
-
-);
+    const topics =
+    await createTopics(
+        mainTopic,
+        count
+    );
 
 
 
-console.log(
-topics
-);
+    console.log(
+        topics
+    );
 
 
 
-for(
-let i=0;
-i<topics.length;
-i++
-){
+    for(
+        let i=0;
+        i<topics.length;
+        i++
+    ){
 
 
-try {
+        try {
 
 
-await generateVideo(
-
-topics[i],
-
-i+1
-
-);
+            await generateVideo(
+                topics[i],
+                i+1
+            );
 
 
-}
-
-catch(error){
-
-
-console.error(
-`VIDEO ${i+1} ERROR`
-);
+        }
+        catch(error){
 
 
-console.error(
-error
-);
+            console.error(
+                `VIDEO ${i+1} ERROR`
+            );
 
 
-}
+            console.error(
+                error
+            );
 
-}
+        }
+
+    }
 
 
 
-console.log(
-"DONE"
-);
-
-
+    console.log(
+        "DONE"
+    );
 
 }
+
+
 
 
 
 main()
 .catch(
-error=>{
+    error=>{
 
-console.error(error);
+        console.error(
+            error
+        );
 
-process.exit(1);
 
-}
+        process.exit(1);
+
+    }
 );
