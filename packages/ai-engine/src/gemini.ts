@@ -1,92 +1,141 @@
-import { GoogleGenAI } from "@google/genai";
-
+import "dotenv/config";
 
 import {
-generateFallbackScript
+    GoogleGenerativeAI
 }
-from "./fallback.js";
+from "@google/generative-ai";
+
+import type {
+    ShortScript
+}
+from "./types.js";
 
 
 
-const ai =
-new GoogleGenAI({
+const apiKey =
+process.env.GEMINI_API_KEY;
 
-apiKey:
-process.env.GEMINI_API_KEY
 
-});
+
+if(!apiKey){
+
+    throw new Error(
+        "GEMINI_API_KEY missing"
+    );
+
+}
+
+
+
+const client =
+new GoogleGenerativeAI(
+    apiKey
+);
+
+
+
+const model =
+client.getGenerativeModel(
+{
+    model:"gemini-2.5-flash"
+}
+);
+
+
 
 
 
 export async function generateShortScript(
-topic:string
-){
+    topic:string
+):Promise<string>{
 
 
-try{
 
+    const prompt = `
 
-const result =
-await ai.models.generateContent({
+Sen profesyonel YouTube Shorts senaristisin.
 
-model:
-"gemini-3.6-flash",
-
-
-contents:
-
-`
-
-Create a Turkish YouTube Shorts script.
-
-
-Topic:
+Konu:
 
 ${topic}
 
 
-Rules:
-
-- 40 seconds
-- Strong hook first sentence
-- Natural spoken Turkish
-- No robotic sentences
+JSON formatında cevap ver.
 
 
-Return JSON:
+Kurallar:
+
+- 30-60 saniyelik video olacak.
+- 6 sahne üret.
+- Her sahnenin görsel açıklaması ayrı olsun.
+- Her sahnenin narration metni ayrı olsun.
+- Türkçe yaz.
+- Açıklama veya markdown kullanma.
+
+
+Format:
+
 
 {
 "title":"",
-"narrationText":"",
+"hook":"",
+
 "scenes":[
+
 {
-"description":"",
-"duration":5
+"id":1,
+"visualPrompt":"",
+"narration":"",
+"estimatedSeconds":5
 }
-]
-}
 
+],
 
-Create 6 scenes.
-
-`
-
-});
-
-
-return result.text ?? "";
-
-
-
-}
-catch{
-
-
-return generateFallbackScript(
-topic
-);
+"fullNarration":""
 
 }
 
+
+`;
+
+
+
+    const result =
+    await model.generateContent(
+        prompt
+    );
+
+
+
+    const text =
+    result.response.text();
+
+
+
+    return cleanJSON(
+        text
+    );
+
+}
+
+
+
+
+
+function cleanJSON(
+    value:string
+):string{
+
+
+    return value
+        .replace(
+            /```json/g,
+            ""
+        )
+        .replace(
+            /```/g,
+            ""
+        )
+        .trim();
 
 }
