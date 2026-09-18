@@ -1,84 +1,114 @@
 import {
+
     generateXTTS,
+
     generatePiperVoice
-} from "./index.js";
+
+}
+from "./index.js";
 
 
-export type SceneVoiceStyle =
+
+
+export type VoiceStyle =
+
     | "excited"
+
     | "documentary"
+
     | "mysterious"
+
     | "neutral";
 
 
-export interface SceneVoiceOptions {
 
-    text: string;
 
-    output: string;
 
-    style?: SceneVoiceStyle;
+export interface GenerateSceneVoiceInput {
 
-    sceneIndex: number;
+
+    text:string;
+
+
+    output:string;
+
+
+    style:VoiceStyle;
+
+
+    sceneIndex:number;
+
 }
 
 
 
+
+
+
+
 export async function generateSceneVoice(
-    options: SceneVoiceOptions
-): Promise<string> {
 
+    input:GenerateSceneVoiceInput
 
-    const {
-        text,
-        output,
-        style = "neutral",
-        sceneIndex
-    } = options;
+):Promise<string>{
 
-
-    console.log(
-        `[VOICE] Scene ${sceneIndex} generating`
-    );
 
 
     try {
 
 
         await generateXTTS(
-            text,
-            output,
-            style
+
+            input.text,
+
+            input.output,
+
+            input.style
+
         );
+
 
 
         console.log(
-            `[VOICE] Scene ${sceneIndex} XTTS success`
+
+            `XTTS scene ${input.sceneIndex} OK`
+
         );
 
 
-    } catch(error) {
-
-
-        console.error(
-            `[VOICE] Scene ${sceneIndex} XTTS failed, using Piper fallback`
-        );
-
-
-        await generatePiperVoice(
-            text,
-            output,
-            sceneIndex
-        );
-
-
-        console.log(
-            `[VOICE] Scene ${sceneIndex} Piper success`
-        );
 
     }
 
 
-    return output;
+    catch(error){
+
+
+
+        console.error(
+
+            `XTTS scene ${input.sceneIndex} failed`
+
+        );
+
+
+
+        await generatePiperVoice(
+
+            input.text,
+
+            input.output,
+
+            input.sceneIndex
+
+        );
+
+
+
+    }
+
+
+
+    return input.output;
+
 
 }
