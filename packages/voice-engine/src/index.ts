@@ -1,23 +1,30 @@
 export {
-generateVoice
+    generateVoice
+}
+from "./piper.js";
+
+
+// eski isim desteği
+export {
+    generateVoice as generatePiperVoice
 }
 from "./piper.js";
 
 
 export {
-enhanceVoice
+    enhanceVoice
+}
+from "./audio-enhancer.js";
+
+
+// eski isim desteği
+export {
+    enhanceVoice as enhanceAudio
 }
 from "./audio-enhancer.js";
 
 
 export {
-getVoiceSettings
+    getVoiceSettings
 }
 from "./director.js";
-
-
-// eski main.ts uyumluluğu
-export {
-enhanceVoice as enhanceAudio
-}
-from "./audio-enhancer.js";
