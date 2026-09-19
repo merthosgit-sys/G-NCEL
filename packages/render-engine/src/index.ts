@@ -1,152 +1,21 @@
-import fs from "fs/promises";
+import {
+
+    convertToShortsFormat
+
+}
+
+from "./ffmpeg.js";
+
 
 import {
-    execFile
-}
-from "child_process";
 
-import {
-    promisify
-}
-from "util";
+    applyEffect,
 
-
-const exec =
-promisify(execFile);
-
-
-
-
-
-export async function concatVideos(
-
-    clips:string[],
-
-    output:string
-
-):Promise<void>{
-
-
-
-    const listFile =
-    "output/video-list.txt";
-
-
-
-    const content =
-
-    clips
-
-    .map(
-
-        clip =>
-
-        `file '${clip}'`
-
-    )
-
-    .join("\n");
-
-
-
-
-
-    await fs.writeFile(
-
-        listFile,
-
-        content,
-
-        "utf8"
-
-    );
-
-
-
-
-
-    await exec(
-
-        "ffmpeg",
-
-        [
-
-            "-y",
-
-            "-f",
-
-            "concat",
-
-            "-safe",
-
-            "0",
-
-            "-i",
-
-            listFile,
-
-            "-c",
-
-            "copy",
-
-            output
-
-        ]
-
-    );
-
+    selectEffect
 
 }
 
-
-
-
-
-
-
-
-export async function createSubtitle(
-
-    audio:string,
-
-    output:string
-
-):Promise<void>{
-
-
-
-    await exec(
-
-        "whisper",
-
-        [
-
-            audio,
-
-            "--language",
-
-            "tr",
-
-            "--task",
-
-            "transcribe",
-
-            "--output_format",
-
-            "srt",
-
-            "--output_dir",
-
-            "output/work"
-
-        ]
-
-    );
-
-
-}
-
-
+from "./effects.js";
 
 
 
@@ -167,53 +36,81 @@ export async function renderShort(
 
 
 
-    await exec(
+    console.log(
 
-        "ffmpeg",
+        "Rendering short:",
 
-        [
-
-            "-y",
-
-            "-i",
-
-            video,
-
-            "-i",
-
-            audio,
-
-            "-vf",
-
-            `subtitles=${subtitle}`,
-
-            "-map",
-
-            "0:v",
-
-            "-map",
-
-            "1:a",
-
-            "-c:v",
-
-            "libx264",
-
-            "-preset",
-
-            "medium",
-
-            "-c:a",
-
-            "aac",
-
-            "-shortest",
-
-            output
-
-        ]
+        output
 
     );
 
+
+
+
+
+    const formattedVideo =
+
+    output.replace(
+
+        ".mp4",
+
+        "-formatted.mp4"
+
+    );
+
+
+
+
+
+
+    await convertToShortsFormat(
+
+        video,
+
+        formattedVideo
+
+    );
+
+
+
+
+
+
+
+    const effect =
+
+    selectEffect(
+
+        "cinematic zoom"
+
+    );
+
+
+
+
+
+
+
+    await applyEffect(
+
+        formattedVideo,
+
+        output,
+
+        effect
+
+    );
+
+
+
+
+
+
+
+    console.log(
+
+        "Render complete"
+
+    );
 
 }
