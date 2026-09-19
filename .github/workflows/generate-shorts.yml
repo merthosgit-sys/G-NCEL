@@ -42,11 +42,14 @@ jobs:
 
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+
       PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
 
       SHORTS_TOPIC: ${{ inputs.topic }}
 
       SHORTS_COUNT: ${{ inputs.count }}
+
 
 
 
@@ -64,6 +67,7 @@ jobs:
 
 
 
+
       - name: Setup Node
 
         uses: actions/setup-node@v4
@@ -71,6 +75,7 @@ jobs:
         with:
 
           node-version: 22
+
 
 
 
@@ -88,6 +93,8 @@ jobs:
 
 
 
+
+
       - name: Install FFmpeg
 
         run: |
@@ -100,11 +107,15 @@ jobs:
 
 
 
+
+
       - name: Install Node Packages
 
         run: |
 
           npm install
+
+
 
 
 
@@ -132,6 +143,8 @@ jobs:
 
 
 
+
+
       - name: Prepare Piper Voice
 
         run: |
@@ -141,6 +154,8 @@ jobs:
           python -m piper.download_voices \
           tr_TR-dfki-medium \
           --data-dir voices
+
+
 
 
 
@@ -160,6 +175,25 @@ jobs:
 
 
 
+
+
+      - name: Check API Keys
+
+        run: |
+
+          echo "Gemini key length: ${#GEMINI_API_KEY}"
+
+          echo "Groq key length: ${#GROQ_API_KEY}"
+
+          echo "Pexels key length: ${#PEXELS_API_KEY}"
+
+
+
+
+
+
+
+
       - name: Type Check
 
         run: |
@@ -170,11 +204,27 @@ jobs:
 
 
 
+
+
       - name: Generate Shorts
+
+        env:
+
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+
+          SHORTS_TOPIC: ${{ inputs.topic }}
+
+          SHORTS_COUNT: ${{ inputs.count }}
 
         run: |
 
           npm run generate
+
+
 
 
 
@@ -189,6 +239,8 @@ jobs:
           echo "===== OUTPUT TREE ====="
 
           find . -maxdepth 5 -type f | sort
+
+
 
 
 
