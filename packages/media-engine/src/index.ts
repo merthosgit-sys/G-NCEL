@@ -1,42 +1,24 @@
 import fs from "fs/promises";
+
 import path from "path";
 
 
 import {
+
     findBestMedia
+
 }
+
 from "./media-search.js";
 
 
 import {
+
     downloadVideo
+
 }
+
 from "./downloader.js";
-
-
-
-
-
-
-
-interface Scene {
-
-
-    id:number;
-
-
-    visualPrompt:string;
-
-
-    searchQueries:string[];
-
-
-    narration:string;
-
-
-}
-
-
 
 
 
@@ -46,17 +28,11 @@ interface Scene {
 
 export async function fetchMultipleScenes(
 
-    scenes:Scene[],
+    scenes:any[],
 
     folder:string
 
 ):Promise<string[]>{
-
-
-
-    const clips:string[] = [];
-
-
 
 
 
@@ -76,6 +52,12 @@ export async function fetchMultipleScenes(
 
 
 
+    const clips:string[] = [];
+
+
+
+
+
 
     for(
 
@@ -87,7 +69,7 @@ export async function fetchMultipleScenes(
 
         console.log(
 
-            "SEARCHING SCENE",
+            "Processing scene",
 
             scene.id
 
@@ -106,22 +88,6 @@ export async function fetchMultipleScenes(
             folder
 
         );
-
-
-
-
-
-        if(!media){
-
-            throw new Error(
-
-                `No media found scene ${scene.id}`
-
-            );
-
-        }
-
-
 
 
 
