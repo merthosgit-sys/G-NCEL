@@ -2,37 +2,42 @@ import fs from "fs/promises";
 import path from "path";
 
 
+import {
+    findBestMedia
+}
+from "./media-search.js";
 
-export interface MediaScene {
+
+import {
+    downloadVideo
+}
+from "./downloader.js";
+
+
+
+
+
+
+
+interface Scene {
+
 
     id:number;
 
+
     visualPrompt:string;
+
+
+    searchQueries:string[];
+
 
     narration:string;
 
-    estimatedSeconds:number;
 
 }
 
 
 
-
-
-const PEXELS_API_KEY =
-process.env.PEXELS_API_KEY;
-
-
-
-
-
-if(!PEXELS_API_KEY){
-
-    throw new Error(
-        "PEXELS_API_KEY missing"
-    );
-
-}
 
 
 
@@ -41,47 +46,48 @@ if(!PEXELS_API_KEY){
 
 export async function fetchMultipleScenes(
 
-    scenes:MediaScene[],
+    scenes:Scene[],
 
-    outputFolder:string
+    folder:string
 
 ):Promise<string[]>{
 
 
 
-    const result:string[] = [];
+    const clips:string[] = [];
 
 
-
-    const videoFolder =
-    path.join(
-        outputFolder,
-        "clips"
-    );
 
 
 
     await fs.mkdir(
-        videoFolder,
+
+        folder,
+
         {
+
             recursive:true
+
         }
+
     );
 
 
 
+
+
+
     for(
+
         const scene of scenes
+
     ){
 
 
-        const file =
 
-        await downloadSceneVideo(
+        console.log(
 
-            scene.visualPrompt,
-
-            videoFolder,
+            "SEARCHING SCENE",
 
             scene.id
 
@@ -89,75 +95,71 @@ export async function fetchMultipleScenes(
 
 
 
-        result.push(
-            file
+
+
+        const media =
+
+        await findBestMedia(
+
+            scene,
+
+            folder
+
         );
 
 
-    }
 
 
 
-    return result;
+        if(!media){
 
-}
+            throw new Error(
 
+                `No media found scene ${scene.id}`
 
-
-
-
-
-
-async function downloadSceneVideo(
-
-    query:string,
-
-    folder:string,
-
-    id:number
-
-):Promise<string>{
-
-
-
-    const searchURL =
-
-    `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=5`;
-
-
-
-
-
-    const response =
-
-    await fetch(
-
-        searchURL,
-
-        {
-
-            headers:{
-
-                Authorization:
-                PEXELS_API_KEY
-
-            }
+            );
 
         }
 
-    );
 
 
 
 
-    if(!response.ok){
 
 
-        throw new Error(
+        const output =
 
-            `Pexels search failed ${response.status}`
+        path.join(
+
+            folder,
+
+            `scene-${scene.id}.mp4`
 
         );
+
+
+
+
+
+        await downloadVideo(
+
+            media,
+
+            output
+
+        );
+
+
+
+
+
+        clips.push(
+
+            output
+
+        );
+
+
 
     }
 
@@ -165,129 +167,6 @@ async function downloadSceneVideo(
 
 
 
-    const data:any =
-
-    await response.json();
-
-
-
-
-
-    const video =
-
-    data.videos?.[0];
-
-
-
-
-
-    if(!video){
-
-
-        throw new Error(
-
-            `No video found for ${query}`
-
-        );
-
-    }
-
-
-
-
-
-
-    const source =
-
-    video.video_files
-
-    .sort(
-
-        (a:any,b:any)=>
-
-        b.width-a.width
-
-    )[0];
-
-
-
-
-
-    const videoURL =
-
-    source.link;
-
-
-
-
-
-
-    const output =
-
-    path.join(
-
-        folder,
-
-        `scene-${id}.mp4`
-
-    );
-
-
-
-
-
-    const videoResponse =
-
-    await fetch(
-
-        videoURL
-
-    );
-
-
-
-
-
-    if(!videoResponse.ok){
-
-
-        throw new Error(
-
-            "Video download failed"
-
-        );
-
-    }
-
-
-
-
-
-    const buffer =
-
-    Buffer.from(
-
-        await videoResponse.arrayBuffer()
-
-    );
-
-
-
-
-
-    await fs.writeFile(
-
-        output,
-
-        buffer
-
-    );
-
-
-
-
-
-    return output;
-
+    return clips;
 
 }
