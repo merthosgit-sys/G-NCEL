@@ -1,19 +1,33 @@
 import fs from "fs/promises";
+
 import axios from "axios";
 
 
 
 
 
-
-
-interface MediaVideo {
-
-
-    videoUrl:string;
+export interface MediaVideo {
 
 
     id:number;
+
+
+    width:number;
+
+
+    height:number;
+
+
+    duration:number;
+
+
+    title:string;
+
+
+    url:string;
+
+
+    videoUrl:string;
 
 
 }
@@ -38,9 +52,9 @@ export async function downloadVideo(
 
     console.log(
 
-        "Downloading video:",
+        "Downloading:",
 
-        media.id
+        media.title
 
     );
 
@@ -48,15 +62,21 @@ export async function downloadVideo(
 
 
 
-    if(!media.videoUrl){
+    if(
+
+        !media.videoUrl
+
+    ){
 
         throw new Error(
 
-            "Video URL missing"
+            "Missing video URL"
 
         );
 
     }
+
+
 
 
 
@@ -82,6 +102,8 @@ export async function downloadVideo(
 
 
 
+
+
     await fs.writeFile(
 
         output,
@@ -98,6 +120,8 @@ export async function downloadVideo(
 
 
 
+
+
     console.log(
 
         "Saved:",
@@ -105,6 +129,8 @@ export async function downloadVideo(
         output
 
     );
+
+
 
 
 
