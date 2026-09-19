@@ -12,6 +12,13 @@ import {
 from "./groq.js";
 
 
+import {
+    cleanAIJson,
+    validateScriptJSON
+}
+from "./json-cleaner.js";
+
+
 
 
 
@@ -44,19 +51,11 @@ new GoogleGenAI({
 
 
 
-
 export async function generateShortScript(
 
     topic:string
 
 ):Promise<string>{
-
-
-
-    console.log(
-        "AI SCRIPT GENERATION:",
-        topic
-    );
 
 
 
@@ -70,7 +69,7 @@ export async function generateShortScript(
 
 
 
-        const result =
+        const response =
 
         await ai.models.generateContent({
 
@@ -91,7 +90,9 @@ export async function generateShortScript(
 
         const text =
 
-        result.text;
+        response.text;
+
+
 
 
 
@@ -105,67 +106,123 @@ export async function generateShortScript(
 
 
 
-        console.log(
-            "Gemini success"
-        );
 
 
+        return validateAndReturn(
 
-        return cleanJSON(
             text
+
         );
 
 
 
     }
 
-    catch(error:any){
+
+    catch(error){
 
 
 
         console.error(
-            "Gemini failed:"
+
+            "Gemini failed"
+
         );
 
 
+
         console.error(
-            error?.message ?? error
+
+            error
+
         );
 
 
 
         console.log(
-            "Switching to Groq fallback..."
+
+            "Switching Groq..."
+
         );
 
 
 
-        const fallback =
-
-        await generateGroqScript(
+        return await generateGroqScript(
 
             topic
 
         );
 
 
+    }
 
-        console.log(
-            "Groq success"
+}
+
+
+
+
+
+
+
+
+
+function validateAndReturn(
+
+    text:string
+
+):string{
+
+
+
+    const cleaned =
+
+    cleanAIJson(
+
+        text
+
+    );
+
+
+
+
+
+    const parsed =
+
+    JSON.parse(
+
+        cleaned
+
+    );
+
+
+
+
+
+    if(
+
+        !validateScriptJSON(
+
+            parsed
+
+        )
+
+    ){
+
+        throw new Error(
+
+            "Invalid Gemini JSON"
+
         );
-
-
-
-        return cleanJSON(
-            fallback
-        );
-
 
     }
 
 
-}
 
+
+
+    return cleaned;
+
+}
 
 
 
@@ -196,14 +253,11 @@ ${topic}
 Sadece JSON döndür.
 
 
-
 Format:
-
 
 {
 "title":"",
 "hook":"",
-
 "scenes":[
 
 {
@@ -214,9 +268,7 @@ Format:
 }
 
 ],
-
 "fullNarration":""
-
 }
 
 
@@ -225,52 +277,12 @@ Kurallar:
 
 - Türkçe yaz.
 - Tam 6 sahne üret.
-- Her sahne için ayrı görsel açıklaması yaz.
-- Bilim, teknoloji ve tarih kanalı formatında hazırla.
-- İlk 3 saniyede güçlü merak oluştur.
-- Anlatım doğal ve akıcı olsun.
+- Her sahne farklı görsel açıklaması içersin.
+- İlk 3 saniye güçlü merak oluştur.
+- Bilim teknoloji tarih kanalına uygun olsun.
 - Markdown kullanma.
 - Açıklama yazma.
-- Sadece JSON döndür.
 
 `;
-
-}
-
-
-
-
-
-
-
-
-function cleanJSON(
-
-    value:string
-
-):string{
-
-
-
-    return value
-
-    .replace(
-
-        /```json/g,
-
-        ""
-
-    )
-
-    .replace(
-
-        /```/g,
-
-        ""
-
-    )
-
-    .trim();
-
 
 }
