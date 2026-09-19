@@ -5,11 +5,6 @@ import {
 }
 from "@google/generative-ai";
 
-import type {
-    ShortScript
-}
-from "./types.js";
-
 
 
 const apiKey =
@@ -20,14 +15,14 @@ process.env.GEMINI_API_KEY;
 if(!apiKey){
 
     throw new Error(
-        "GEMINI_API_KEY missing"
+        "Missing GEMINI_API_KEY"
     );
 
 }
 
 
 
-const client =
+const genAI =
 new GoogleGenerativeAI(
     apiKey
 );
@@ -35,9 +30,12 @@ new GoogleGenerativeAI(
 
 
 const model =
-client.getGenerativeModel(
+genAI.getGenerativeModel(
 {
-    model:"gemini-2.5-flash"
+
+    model:
+    "gemini-2.0-flash"
+
 }
 );
 
@@ -46,40 +44,31 @@ client.getGenerativeModel(
 
 
 export async function generateShortScript(
+
     topic:string
+
 ):Promise<string>{
 
 
 
     const prompt = `
 
-Sen profesyonel YouTube Shorts senaristisin.
+You are a professional YouTube Shorts script writer.
 
-Konu:
+Create a Turkish short video script.
+
+Topic:
 
 ${topic}
 
 
-JSON formatında cevap ver.
-
-
-Kurallar:
-
-- 30-60 saniyelik video olacak.
-- 6 sahne üret.
-- Her sahnenin görsel açıklaması ayrı olsun.
-- Her sahnenin narration metni ayrı olsun.
-- Türkçe yaz.
-- Açıklama veya markdown kullanma.
-
+Return ONLY valid JSON.
 
 Format:
-
 
 {
 "title":"",
 "hook":"",
-
 "scenes":[
 
 {
@@ -90,17 +79,26 @@ Format:
 }
 
 ],
-
 "fullNarration":""
-
 }
 
+
+Rules:
+
+- Exactly 6 scenes.
+- Turkish language.
+- Each scene has different visualPrompt.
+- Narration should be engaging.
+- Total length 30-60 seconds.
+- No markdown.
+- No explanation.
 
 `;
 
 
 
     const result =
+
     await model.generateContent(
         prompt
     );
@@ -108,34 +106,23 @@ Format:
 
 
     const text =
+
     result.response.text();
 
 
 
-    return cleanJSON(
-        text
-    );
+    return text
 
-}
-
-
-
-
-
-function cleanJSON(
-    value:string
-):string{
-
-
-    return value
         .replace(
             /```json/g,
             ""
         )
+
         .replace(
             /```/g,
             ""
         )
+
         .trim();
 
 }
