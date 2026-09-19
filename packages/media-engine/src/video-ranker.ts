@@ -1,4 +1,4 @@
-interface VideoCandidate {
+export interface VideoCandidate {
 
 
     id:number;
@@ -13,10 +13,18 @@ interface VideoCandidate {
     duration:number;
 
 
-    title?:string;
+    title:string;
+
+
+    url:string;
+
+
+    videoUrl:string;
 
 
 }
+
+
 
 
 
@@ -26,7 +34,7 @@ export function rankVideos(
 
     videos:VideoCandidate[]
 
-){
+):VideoCandidate[]{
 
 
 
@@ -64,9 +72,12 @@ export function rankVideos(
 
         ) =>
 
-        b.score - a.score
+        b.score -
+
+        a.score
 
     )
+
 
     .map(
 
@@ -75,6 +86,7 @@ export function rankVideos(
         item.video
 
     );
+
 
 }
 
@@ -90,7 +102,7 @@ function calculateScore(
 
     video:VideoCandidate
 
-){
+):number{
 
 
 
@@ -100,15 +112,15 @@ function calculateScore(
 
 
 
-    // HD kalite
+    // yüksek çözünürlük
 
     if(
 
-        video.width >= 1920
+        video.width >=1920
 
     ){
 
-        score += 30;
+        score +=30;
 
     }
 
@@ -126,7 +138,9 @@ function calculateScore(
 
 
 
-    // Shorts için yeterli süre
+
+
+    // Shorts için uygun süre
 
     if(
 
@@ -144,7 +158,9 @@ function calculateScore(
 
 
 
-    // Dikey video avantajı
+
+
+    // Dikey videoya öncelik
 
     if(
 
@@ -162,17 +178,23 @@ function calculateScore(
 
 
 
-    // Başlık bilgisi
+
+
+    // Başlık varsa
 
     if(
 
-        video.title
+        video.title &&
+
+        video.title.length >0
 
     ){
 
         score +=15;
 
     }
+
+
 
 
 
