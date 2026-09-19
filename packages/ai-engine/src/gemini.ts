@@ -13,8 +13,11 @@ from "./groq.js";
 
 
 import {
+
     cleanAIJson,
+
     validateScriptJSON
+
 }
 from "./json-cleaner.js";
 
@@ -22,8 +25,13 @@ from "./json-cleaner.js";
 
 
 
+
+
 const apiKey =
+
 process.env.GEMINI_API_KEY;
+
+
 
 
 
@@ -37,12 +45,16 @@ if(!apiKey){
 
 
 
+
+
 const ai =
+
 new GoogleGenAI({
 
     apiKey
 
 });
+
 
 
 
@@ -59,12 +71,13 @@ export async function generateShortScript(
 
 
 
-    try {
-
+    try{
 
 
         console.log(
-            "Trying Gemini..."
+
+            "AI Director: Gemini"
+
         );
 
 
@@ -80,7 +93,11 @@ export async function generateShortScript(
 
             contents:
 
-            createPrompt(topic)
+            createDirectorPrompt(
+
+                topic
+
+            )
 
         });
 
@@ -99,7 +116,9 @@ export async function generateShortScript(
         if(!text){
 
             throw new Error(
+
                 "Gemini empty response"
+
             );
 
         }
@@ -108,7 +127,7 @@ export async function generateShortScript(
 
 
 
-        return validateAndReturn(
+        return validateResult(
 
             text
 
@@ -118,30 +137,13 @@ export async function generateShortScript(
 
     }
 
-
     catch(error){
 
 
 
         console.error(
 
-            "Gemini failed"
-
-        );
-
-
-
-        console.error(
-
-            error
-
-        );
-
-
-
-        console.log(
-
-            "Switching Groq..."
+            "Gemini failed, using Groq"
 
         );
 
@@ -156,6 +158,7 @@ export async function generateShortScript(
 
     }
 
+
 }
 
 
@@ -166,7 +169,7 @@ export async function generateShortScript(
 
 
 
-function validateAndReturn(
+function validateResult(
 
     text:string
 
@@ -210,7 +213,7 @@ function validateAndReturn(
 
         throw new Error(
 
-            "Invalid Gemini JSON"
+            "AI output format invalid"
 
         );
 
@@ -222,6 +225,7 @@ function validateAndReturn(
 
     return cleaned;
 
+
 }
 
 
@@ -231,7 +235,8 @@ function validateAndReturn(
 
 
 
-function createPrompt(
+
+function createDirectorPrompt(
 
     topic:string
 
@@ -241,47 +246,205 @@ function createPrompt(
 
 return `
 
-Sen profesyonel YouTube Shorts senaristisin.
+Sen profesyonel bir YouTube Shorts AI yönetmenisin.
 
 
-Konu:
+
+Görevin:
 
 ${topic}
+
+konusunda yüksek kaliteli kısa video planı hazırlamak.
+
+
+
+Amaç:
+
+İzleyiciyi ilk 3 saniyede yakalamak.
+
+Videonun sonuna kadar izletmek.
+
+Gerçekçi ve sinematik görüntüler kullanmak.
+
+
 
 
 
 Sadece JSON döndür.
 
 
+
 Format:
 
+
 {
+
 "title":"",
+
 "hook":"",
+
+
+"contentType":"science",
+
+
+"style":{
+
+"visual":"cinematic realistic",
+
+"tone":"mysterious"
+
+},
+
+
+
 "scenes":[
 
+
+
 {
+
 "id":1,
-"visualPrompt":"",
+
+
+"duration":6,
+
+
 "narration":"",
-"estimatedSeconds":5
-}
+
+
+"visualPrompt":"",
+
+
+"searchQueries":[
+
+"",
+
+"",
+
+""
 
 ],
-"fullNarration":""
+
+
+"cameraStyle":"",
+
+
+"mood":""
+
 }
+
+
+
+],
+
+
+
+"fullNarration":""
+
+
+}
+
+
 
 
 
 Kurallar:
 
+
+
+GENEL:
+
 - Türkçe yaz.
 - Tam 6 sahne üret.
-- Her sahne farklı görsel açıklaması içersin.
-- İlk 3 saniye güçlü merak oluştur.
-- Bilim teknoloji tarih kanalına uygun olsun.
+- Her sahne 5-8 saniye arası olsun.
+- Toplam süre Shorts formatına uygun olsun.
+
+
+
+ANLATIM:
+
+- İlk sahne güçlü merak uyandırsın.
+- Basit ama etkileyici anlatım kullan.
+- Gereksiz bilgi doldurma.
+- İzleyiciyi tutacak hikaye yapısı kullan.
+
+
+
+GÖRSELLER:
+
+Her sahne için:
+
+visualPrompt:
+
+gerçekçi film sahnesi gibi yaz.
+
+
+searchQueries:
+
+stok video araması için İngilizce 3 farklı kelime grubu üret.
+
+
+
+Örnek:
+
+Kötü:
+
+"elektrik"
+
+
+İyi:
+
+"Nikola Tesla laboratory"
+
+"Tesla coil electricity sparks"
+
+"historic electrical experiment"
+
+
+
+KAMERA:
+
+Şunlardan uygun olanları kullan:
+
+- cinematic zoom
+- slow motion
+- aerial shot
+- close up
+- tracking shot
+- macro shot
+
+
+
+STİL:
+
+Bilim:
+
+cinematic documentary
+
+
+Teknoloji:
+
+futuristic realistic
+
+
+Tarih:
+
+historical documentary
+
+
+Çocuk:
+
+3D animation
+
+
+
+
+
+Kesinlikle:
+
 - Markdown kullanma.
 - Açıklama yazma.
+- JSON dışında hiçbir şey yazma.
 
 `;
 
