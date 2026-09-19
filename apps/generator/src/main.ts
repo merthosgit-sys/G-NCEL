@@ -43,11 +43,43 @@ interface Scene {
 
     id:number;
 
-    visualPrompt:string;
+    duration:number;
 
     narration:string;
 
-    estimatedSeconds:number;
+    visualPrompt:string;
+
+    searchQueries:string[];
+
+    cameraStyle:string;
+
+    mood:string;
+
+}
+
+
+
+
+
+interface ShortScript {
+
+    title:string;
+
+    hook:string;
+
+    contentType:string;
+
+    style:{
+
+        visual:string;
+
+        tone:string;
+
+    };
+
+    scenes:Scene[];
+
+    fullNarration:string;
 
 }
 
