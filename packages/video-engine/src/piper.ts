@@ -1,43 +1,147 @@
-import { execFile } from "child_process";
-import { promisify } from "util";
+import {
+    spawn
+}
+from "child_process";
+
+import {
+    promisify
+}
+from "util";
+
+import fs from "fs/promises";
 
 
-const exec =
-promisify(execFile);
 
 
 
-export async function generateVoice(
- text:string,
- output:string
-){
+export async function generatePiperVoice(
 
-console.log(
- "Generating Turkish voice..."
-);
+    text:string,
 
+    output:string,
 
-await exec(
- "python",
- [
-  "-m",
-  "piper",
-  "--model",
-  "tr_TR-dfki-medium",
-  "--output_file",
-  output
- ],
- {
-  input:text
- }
-);
+    index:number
+
+):Promise<string>{
 
 
-console.log(
- `Voice saved: ${output}`
-);
+
+    await fs.mkdir(
+
+        "output/audio",
+
+        {
+            recursive:true
+        }
+
+    );
 
 
-return output;
+
+
+
+    return new Promise(
+
+        (
+
+            resolve,
+
+            reject
+
+        )=>{
+
+
+
+            const process =
+
+            spawn(
+
+                "piper",
+
+                [
+
+                    "--model",
+
+                    "voices/tr_TR-dfki-medium.onnx",
+
+                    "--output_file",
+
+                    output
+
+                ]
+
+            );
+
+
+
+
+
+            process.stdin.write(
+
+                text
+
+            );
+
+
+
+            process.stdin.end();
+
+
+
+
+
+            process.on(
+
+                "close",
+
+                code=>{
+
+
+                    if(code !== 0){
+
+
+                        reject(
+
+                            new Error(
+
+                                `Piper failed ${code}`
+
+                            )
+
+                        );
+
+
+                        return;
+
+                    }
+
+
+
+
+
+                    resolve(
+
+                        output
+
+                    );
+
+
+                }
+
+            );
+
+
+
+
+
+        }
+
+    );
+
 
 }
+
+
+
+export const generateVoice =
+generatePiperVoice;
