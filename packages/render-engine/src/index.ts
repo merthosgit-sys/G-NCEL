@@ -1,24 +1,18 @@
+import fs from "fs/promises";
+
 import {
-
     execFile
-
 }
 from "child_process";
 
 import {
-
     promisify
-
 }
 from "util";
 
 
-
 const exec =
-promisify(
-    execFile
-);
-
+promisify(execFile);
 
 
 
@@ -57,14 +51,15 @@ export async function concatVideos(
 
 
 
-    await Bun.write(
+    await fs.writeFile(
 
         listFile,
 
-        content
+        content,
+
+        "utf8"
 
     );
-
 
 
 
@@ -110,7 +105,6 @@ export async function concatVideos(
 
 
 
-
 export async function createSubtitle(
 
     audio:string,
@@ -131,7 +125,7 @@ export async function createSubtitle(
 
             "--language",
 
-            "Turkish",
+            "tr",
 
             "--task",
 
@@ -150,9 +144,7 @@ export async function createSubtitle(
     );
 
 
-
 }
-
 
 
 
@@ -172,8 +164,6 @@ export async function renderShort(
     output:string
 
 ):Promise<void>{
-
-
 
 
 
@@ -224,7 +214,6 @@ export async function renderShort(
         ]
 
     );
-
 
 
 }
