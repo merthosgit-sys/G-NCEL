@@ -27,11 +27,13 @@ process.env.GROQ_API_KEY;
 
 
 
+
+
 if(!apiKey){
 
-    throw new Error(
+    console.warn(
 
-        "GROQ_API_KEY missing"
+        "GROQ_API_KEY missing, Groq fallback disabled"
 
     );
 
@@ -41,7 +43,13 @@ if(!apiKey){
 
 
 
+
+
 const client =
+
+apiKey
+
+?
 
 new OpenAI({
 
@@ -51,7 +59,12 @@ new OpenAI({
 
     "https://api.groq.com/openai/v1"
 
-});
+})
+
+:
+
+null;
+
 
 
 
@@ -64,7 +77,9 @@ const models = [
 
     "llama-3.3-70b-versatile",
 
-    "qwen-2.5-32b"
+    "llama-3.1-8b-instant",
+
+    "openai/gpt-oss-20b"
 
 ];
 
@@ -84,7 +99,25 @@ export async function generateGroqScript(
 
 
 
+    if(!client){
+
+        throw new Error(
+
+            "Groq API key missing"
+
+        );
+
+    }
+
+
+
+
+
+
+
     let lastError:any;
+
+
 
 
 
@@ -114,6 +147,8 @@ export async function generateGroqScript(
 
 
 
+
+
             const response =
 
             await client.chat.completions.create({
@@ -126,9 +161,8 @@ export async function generateGroqScript(
 
                     {
 
-                        role:
 
-                        "system",
+                        role:"system",
 
 
                         content:
@@ -140,9 +174,7 @@ export async function generateGroqScript(
 
                     {
 
-                        role:
-
-                        "user",
+                        role:"user",
 
 
                         content:
@@ -215,6 +247,8 @@ export async function generateGroqScript(
 
 
 
+
+
             const json =
 
             JSON.parse(
@@ -222,6 +256,8 @@ export async function generateGroqScript(
                 cleaned
 
             );
+
+
 
 
 
@@ -239,11 +275,13 @@ export async function generateGroqScript(
 
                 throw new Error(
 
-                    "Invalid Groq output"
+                    "Invalid Groq JSON"
 
                 );
 
             }
+
+
 
 
 
@@ -261,7 +299,11 @@ export async function generateGroqScript(
 
 
 
+
+
             return cleaned;
+
+
 
 
 
@@ -269,7 +311,7 @@ export async function generateGroqScript(
 
         }
 
-        catch(error){
+        catch(error:any){
 
 
 
@@ -283,6 +325,14 @@ export async function generateGroqScript(
 
 
 
+            console.error(
+
+                error?.message ?? error
+
+            );
+
+
+
             lastError = error;
 
 
@@ -291,6 +341,8 @@ export async function generateGroqScript(
 
 
     }
+
+
 
 
 
@@ -325,11 +377,11 @@ ${topic}
 
 
 
-Bu konu için YouTube Shorts videosu planla.
+Sen profesyonel YouTube Shorts AI yönetmenisin.
 
 
 
-Sen AI video yönetmenisin.
+Bu konu için sinematik kısa video planı oluştur.
 
 
 
@@ -338,6 +390,7 @@ Sadece JSON döndür.
 
 
 Format:
+
 
 
 {
@@ -369,9 +422,7 @@ Format:
 
 "narration":"",
 
-
 "visualPrompt":"",
-
 
 "searchQueries":[
 
@@ -383,9 +434,7 @@ Format:
 
 ],
 
-
 "cameraStyle":"",
-
 
 "mood":""
 
@@ -396,7 +445,6 @@ Format:
 
 "fullNarration":""
 
-
 }
 
 
@@ -404,54 +452,14 @@ Format:
 
 Kurallar:
 
-
 - Türkçe yaz.
 - Tam 6 sahne üret.
-- Her sahne 5-8 saniye olsun.
-- İlk sahne çok güçlü hook içersin.
-- Her sahne için İngilizce 3 medya arama kelimesi üret.
-- Görsel açıklamaları gerçekçi ve sinematik olsun.
-- Bilim, teknoloji, tarih içerik kalitesinde yaz.
-- İzleyiciyi videonun sonuna kadar tutacak hikaye yapısı kullan.
-
-
-
-Görsel arama örneği:
-
-
-
-Yanlış:
-
-"elektrik"
-
-
-
-Doğru:
-
-"Tesla laboratory"
-
-"electricity experiment sparks"
-
-"vintage science laboratory"
-
-
-
-Kamera seçenekleri:
-
-- cinematic zoom
-- close up
-- tracking shot
-- aerial shot
-- macro shot
-
-
-
-Markdown yok.
-
-Açıklama yok.
-
-Sadece JSON.
-
+- İlk sahne güçlü merak oluşturmalı.
+- Her sahne için 3 İngilizce arama kelimesi üret.
+- Görseller gerçekçi ve sinematik olsun.
+- Bilim, teknoloji, tarih içerik kalitesi kullan.
+- Markdown kullanma.
+- Sadece JSON döndür.
 
 `;
 
