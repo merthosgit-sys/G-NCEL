@@ -4,9 +4,13 @@ import OpenAI from "openai";
 
 
 import {
+
     cleanAIJson,
+
     validateScriptJSON
+
 }
+
 from "./json-cleaner.js";
 
 
@@ -37,7 +41,6 @@ if(!apiKey){
 
 
 
-
 const client =
 
 new OpenAI({
@@ -49,6 +52,7 @@ new OpenAI({
     "https://api.groq.com/openai/v1"
 
 });
+
 
 
 
@@ -84,6 +88,8 @@ export async function generateGroqScript(
 
 
 
+
+
     for(
 
         const model of models
@@ -92,13 +98,13 @@ export async function generateGroqScript(
 
 
 
-        try {
+        try{
 
 
 
             console.log(
 
-                "Trying:",
+                "AI Director fallback:",
 
                 model
 
@@ -115,7 +121,22 @@ export async function generateGroqScript(
                 model,
 
 
+
                 messages:[
+
+                    {
+
+                        role:
+
+                        "system",
+
+
+                        content:
+
+                        "Sen profesyonel YouTube Shorts AI yönetmenisin."
+
+                    },
+
 
                     {
 
@@ -126,7 +147,11 @@ export async function generateGroqScript(
 
                         content:
 
-                        prompt(topic)
+                        createDirectorPrompt(
+
+                            topic
+
+                        )
 
                     }
 
@@ -139,6 +164,8 @@ export async function generateGroqScript(
                 0.8
 
             });
+
+
 
 
 
@@ -158,15 +185,19 @@ export async function generateGroqScript(
 
 
 
+
+
             if(!text){
 
                 throw new Error(
 
-                    "Empty Groq response"
+                    "Groq empty response"
 
                 );
 
             }
+
+
 
 
 
@@ -184,7 +215,7 @@ export async function generateGroqScript(
 
 
 
-            const parsed =
+            const json =
 
             JSON.parse(
 
@@ -200,7 +231,7 @@ export async function generateGroqScript(
 
                 !validateScriptJSON(
 
-                    parsed
+                    json
 
                 )
 
@@ -208,7 +239,7 @@ export async function generateGroqScript(
 
                 throw new Error(
 
-                    "Invalid Groq JSON"
+                    "Invalid Groq output"
 
                 );
 
@@ -220,7 +251,7 @@ export async function generateGroqScript(
 
             console.log(
 
-                "Success:",
+                "Groq success:",
 
                 model
 
@@ -234,6 +265,8 @@ export async function generateGroqScript(
 
 
 
+
+
         }
 
         catch(error){
@@ -242,9 +275,9 @@ export async function generateGroqScript(
 
             console.error(
 
-                model,
+                "Groq failed:",
 
-                "failed"
+                model
 
             );
 
@@ -253,7 +286,9 @@ export async function generateGroqScript(
             lastError = error;
 
 
+
         }
+
 
     }
 
@@ -272,16 +307,16 @@ export async function generateGroqScript(
 
 
 
-function prompt(
+
+function createDirectorPrompt(
 
     topic:string
 
 ){
 
 
-return `
 
-Sen profesyonel YouTube Shorts senaristisin.
+return `
 
 
 Konu:
@@ -290,37 +325,133 @@ ${topic}
 
 
 
+Bu konu için YouTube Shorts videosu planla.
+
+
+
+Sen AI video yönetmenisin.
+
+
+
 Sadece JSON döndür.
+
 
 
 Format:
 
+
 {
+
 "title":"",
+
 "hook":"",
+
+
+"contentType":"science",
+
+
+"style":{
+
+"visual":"cinematic realistic",
+
+"tone":"mysterious"
+
+},
+
+
 "scenes":[
 
 {
+
 "id":1,
-"visualPrompt":"",
+
+"duration":6,
+
 "narration":"",
-"estimatedSeconds":5
+
+
+"visualPrompt":"",
+
+
+"searchQueries":[
+
+"",
+
+"",
+
+""
+
+],
+
+
+"cameraStyle":"",
+
+
+"mood":""
+
 }
 
 ],
+
+
 "fullNarration":""
+
+
 }
+
 
 
 
 Kurallar:
 
-- Türkçe.
-- 6 sahne.
-- Her sahnede farklı görsel açıklaması.
-- Bilim teknoloji tarih içerikleri.
-- Merak uyandıran anlatım.
-- Markdown yok.
+
+- Türkçe yaz.
+- Tam 6 sahne üret.
+- Her sahne 5-8 saniye olsun.
+- İlk sahne çok güçlü hook içersin.
+- Her sahne için İngilizce 3 medya arama kelimesi üret.
+- Görsel açıklamaları gerçekçi ve sinematik olsun.
+- Bilim, teknoloji, tarih içerik kalitesinde yaz.
+- İzleyiciyi videonun sonuna kadar tutacak hikaye yapısı kullan.
+
+
+
+Görsel arama örneği:
+
+
+
+Yanlış:
+
+"elektrik"
+
+
+
+Doğru:
+
+"Tesla laboratory"
+
+"electricity experiment sparks"
+
+"vintage science laboratory"
+
+
+
+Kamera seçenekleri:
+
+- cinematic zoom
+- close up
+- tracking shot
+- aerial shot
+- macro shot
+
+
+
+Markdown yok.
+
+Açıklama yok.
+
+Sadece JSON.
+
 
 `;
 
