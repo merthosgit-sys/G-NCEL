@@ -1,25 +1,157 @@
-export interface ShortScene {
+export type ContentMode =
 
-    id:number;
+    | "science"
 
-    visualPrompt:string;
+    | "technology"
 
-    narration:string;
+    | "history"
 
-    estimatedSeconds:number;
+    | "kids"
+
+    | "story"
+
+    | "product";
+
+
+
+
+
+export type VisualStyle =
+
+    | "cinematic_realistic"
+
+    | "documentary"
+
+    | "3d_animation"
+
+    | "cartoon"
+
+    | "futuristic";
+
+
+
+
+
+export type Tone =
+
+    | "mysterious"
+
+    | "exciting"
+
+    | "educational"
+
+    | "emotional"
+
+    | "fun";
+
+
+
+
+
+
+
+
+export interface ChannelStyle {
+
+
+    mode:ContentMode;
+
+
+    audience:string;
+
+
+    visualStyle:VisualStyle;
+
+
+    tone:Tone;
+
+
+    language:string;
+
 
 }
 
 
 
+
+
+
+
+
+
+export interface Scene {
+
+
+    id:number;
+
+
+
+    duration:number;
+
+
+
+    narration:string;
+
+
+
+    visualPrompt:string;
+
+
+
+    searchQueries:string[];
+
+
+
+    cameraStyle:string;
+
+
+
+    mood:Tone;
+
+
+
+}
+
+
+
+
+
+
+
+
+
 export interface ShortScript {
+
 
     title:string;
 
+
+
     hook:string;
 
-    scenes:ShortScene[];
+
+
+    contentType:ContentMode;
+
+
+
+    style:{
+
+        visual:string;
+
+
+        tone:string;
+
+    };
+
+
+
+    scenes:Scene[];
+
+
 
     fullNarration:string;
+
+
 
 }
