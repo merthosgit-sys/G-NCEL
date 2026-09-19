@@ -1,9 +1,9 @@
 import "dotenv/config";
 
 import {
-    GoogleGenerativeAI
+    GoogleGenAI
 }
-from "@google/generative-ai";
+from "@google/genai";
 
 
 
@@ -15,29 +15,20 @@ process.env.GEMINI_API_KEY;
 if(!apiKey){
 
     throw new Error(
-        "Missing GEMINI_API_KEY"
+        "GEMINI_API_KEY missing"
     );
 
 }
 
 
 
-const genAI =
-new GoogleGenerativeAI(
-    apiKey
+const ai =
+new GoogleGenAI(
+    {
+        apiKey
+    }
 );
 
-
-
-const model =
-genAI.getGenerativeModel(
-{
-
-    model:
-    "gemini-2.0-flash"
-
-}
-);
 
 
 
@@ -53,22 +44,24 @@ export async function generateShortScript(
 
     const prompt = `
 
-You are a professional YouTube Shorts script writer.
+Sen profesyonel YouTube Shorts senaristisin.
 
-Create a Turkish short video script.
 
-Topic:
+Konu:
 
 ${topic}
 
 
-Return ONLY valid JSON.
+
+Sadece JSON döndür.
+
 
 Format:
 
 {
 "title":"",
 "hook":"",
+
 "scenes":[
 
 {
@@ -79,50 +72,108 @@ Format:
 }
 
 ],
+
 "fullNarration":""
+
 }
 
 
-Rules:
 
-- Exactly 6 scenes.
-- Turkish language.
-- Each scene has different visualPrompt.
-- Narration should be engaging.
-- Total length 30-60 seconds.
-- No markdown.
-- No explanation.
+Kurallar:
+
+- Türkçe yaz.
+- Tam 6 sahne üret.
+- Her sahne için farklı görsel açıklaması oluştur.
+- Her sahnenin narration metni ayrı olsun.
+- Toplam video süresi 30-60 saniye olsun.
+- Markdown kullanma.
+- Açıklama yazma.
+- Sadece JSON döndür.
 
 `;
 
 
 
-    const result =
 
-    await model.generateContent(
-        prompt
+
+    const response =
+
+    await ai.models.generateContent(
+
+        {
+
+            model:
+            "gemini-2.0-flash",
+
+
+            contents:
+            prompt
+
+        }
+
     );
+
+
 
 
 
     const text =
 
-    result.response.text();
+    response.text;
 
 
 
-    return text
+    if(!text){
+
+        throw new Error(
+            "Gemini empty response"
+        );
+
+    }
+
+
+
+
+
+    return cleanJSON(
+        text
+    );
+
+}
+
+
+
+
+
+
+
+
+function cleanJSON(
+
+    value:string
+
+):string{
+
+
+    return value
 
         .replace(
+
             /```json/g,
+
             ""
+
         )
 
         .replace(
+
             /```/g,
+
             ""
+
         )
 
         .trim();
+
 
 }
