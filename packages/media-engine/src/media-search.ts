@@ -1,33 +1,20 @@
 import {
-
     expandKeywords
-
 }
-
 from "./keyword-expander.js";
 
 
-
 import {
-
-    rankVideos
-
+    rankVideos,
+    VideoCandidate
 }
-
 from "./video-ranker.js";
 
 
-
 import {
-
     searchPexelsVideos
-
 }
-
 from "./pexels.js";
-
-
-
 
 
 
@@ -39,7 +26,7 @@ export async function findBestMedia(
 
     folder:string
 
-){
+):Promise<VideoCandidate>{
 
 
 
@@ -47,17 +34,15 @@ export async function findBestMedia(
 
     expandKeywords(
 
-        scene.searchQueries
+        scene.searchQueries ?? []
 
     );
 
 
 
-
-
     console.log(
 
-        "MEDIA SEARCH:",
+        "MEDIA QUERIES:",
 
         queries
 
@@ -65,9 +50,7 @@ export async function findBestMedia(
 
 
 
-
-
-    let candidates:any[] = [];
+    let videos:VideoCandidate[] = [];
 
 
 
@@ -81,27 +64,50 @@ export async function findBestMedia(
 
 
 
-        const results =
-
-        await searchPexelsVideos(
-
-            query
-
-        );
+        try{
 
 
 
+            const result =
+
+            await searchPexelsVideos(
+
+                query
+
+            );
 
 
-        candidates.push(
 
-            ...results
+            videos.push(
 
-        );
+                ...result
+
+            );
+
+
+
+        }
+
+        catch(error){
+
+
+
+            console.log(
+
+                "Search failed:",
+
+                query
+
+            );
+
+
+
+        }
 
 
 
     }
+
 
 
 
@@ -109,17 +115,18 @@ export async function findBestMedia(
 
     if(
 
-        candidates.length ===0
+        videos.length === 0
 
     ){
 
         throw new Error(
 
-            "No media found"
+            "No media candidates found"
 
         );
 
     }
+
 
 
 
@@ -129,7 +136,7 @@ export async function findBestMedia(
 
     rankVideos(
 
-        candidates
+        videos
 
     );
 
