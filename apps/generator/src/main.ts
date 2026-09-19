@@ -39,21 +39,34 @@ from "../../../packages/voice-engine/src/index.js";
 
 
 
+
+
 interface Scene {
+
 
     id:number;
 
+
     duration:number;
+
+
+    estimatedSeconds?:number;
+
 
     narration:string;
 
+
     visualPrompt:string;
+
 
     searchQueries:string[];
 
+
     cameraStyle:string;
 
+
     mood:string;
+
 
 }
 
@@ -61,13 +74,18 @@ interface Scene {
 
 
 
+
 interface ShortScript {
+
 
     title:string;
 
+
     hook:string;
 
+
     contentType:string;
+
 
     style:{
 
@@ -77,25 +95,17 @@ interface ShortScript {
 
     };
 
+
     scenes:Scene[];
 
+
     fullNarration:string;
+
 
 }
 
 
 
-interface ShortScript {
-
-    title:string;
-
-    hook:string;
-
-    scenes:Scene[];
-
-    fullNarration:string;
-
-}
 
 
 
@@ -103,14 +113,24 @@ interface ShortScript {
 
 
 const count =
+
 Number(
+
     process.env.SHORTS_COUNT ?? "1"
+
 );
 
 
 
+
+
 const mainTopic =
-process.env.SHORTS_TOPIC ?? "teknoloji";
+
+process.env.SHORTS_TOPIC ??
+
+"teknoloji";
+
+
 
 
 
@@ -120,34 +140,52 @@ process.env.SHORTS_TOPIC ?? "teknoloji";
 
 async function prepareFolders(){
 
+
     const folders = [
+
 
         "output",
 
+
         "output/final",
+
 
         "output/work",
 
+
         "output/audio"
+
 
     ];
 
 
 
     for(
+
         const folder of folders
+
     ){
 
+
+
         await fs.mkdir(
+
             folder,
+
             {
+
                 recursive:true
+
             }
+
         );
+
 
     }
 
+
 }
+
 
 
 
@@ -169,25 +207,40 @@ async function mergeAudioFiles(
     if(files.length === 0){
 
         throw new Error(
+
             "Audio list empty"
+
         );
 
     }
 
 
 
+
+
     const listPath =
+
     "output/audio-list.txt";
 
 
 
+
+
     const content =
+
     files
+
     .map(
+
         file =>
+
         `file '${path.resolve(file)}'`
+
     )
+
     .join("\n");
+
+
 
 
 
@@ -210,8 +263,12 @@ async function mergeAudioFiles(
         execFile
 
     } = await import(
+
         "child_process"
+
     );
+
+
 
 
 
@@ -220,13 +277,20 @@ async function mergeAudioFiles(
         promisify
 
     } = await import(
+
         "util"
+
     );
 
 
 
+
+
     const exec =
+
     promisify(execFile);
+
+
 
 
 
@@ -284,22 +348,32 @@ async function generateVideo(
 
 
     console.log(
+
         "===================="
+
     );
 
 
 
     console.log(
+
         "VIDEO",
+
         index
+
     );
 
 
 
     console.log(
+
         "TOPIC",
+
         topic
+
     );
+
+
 
 
 
@@ -308,14 +382,21 @@ async function generateVideo(
     const scriptText =
 
     await generateShortScript(
+
         topic
+
     );
+
+
 
 
 
     console.log(
+
         "SCRIPT GENERATED"
+
     );
+
 
 
 
@@ -324,23 +405,36 @@ async function generateVideo(
     const script =
 
     JSON.parse(
+
         scriptText
+
     ) as ShortScript;
 
 
 
 
 
+
+
     if(
-        !Array.isArray(script.scenes) ||
+
+        !Array.isArray(script.scenes)
+
+        ||
+
         script.scenes.length === 0
+
     ){
 
         throw new Error(
-            "No scenes returned from Gemini"
+
+            "No scenes returned"
+
         );
 
     }
+
+
 
 
 
@@ -364,15 +458,21 @@ async function generateVideo(
 
 
 
+
+
     await fs.mkdir(
 
         folder,
 
         {
+
             recursive:true
+
         }
 
     );
+
+
 
 
 
@@ -406,9 +506,56 @@ async function generateVideo(
 
 
 
+
+
     console.log(
-        "FETCHING MEDIA"
+
+        "PREPARING MEDIA"
+
     );
+
+
+
+
+
+
+
+    const preparedScenes =
+
+    script.scenes.map(
+
+        scene => ({
+
+
+
+            ...scene,
+
+
+
+            searchQueries:
+
+            scene.searchQueries &&
+
+            scene.searchQueries.length > 0
+
+            ?
+
+            scene.searchQueries
+
+            :
+
+            [
+
+                scene.visualPrompt
+
+            ]
+
+        })
+
+    );
+
+
+
 
 
 
@@ -418,7 +565,7 @@ async function generateVideo(
 
     await fetchMultipleScenes(
 
-        script.scenes,
+        preparedScenes,
 
         folder
 
@@ -428,10 +575,18 @@ async function generateVideo(
 
 
 
-    if(clips.length === 0){
+
+
+    if(
+
+        clips.length === 0
+
+    ){
 
         throw new Error(
-            "No media clips created"
+
+            "No clips generated"
+
         );
 
     }
@@ -456,6 +611,8 @@ async function generateVideo(
 
 
 
+
+
     await concatVideos(
 
         clips,
@@ -468,8 +625,12 @@ async function generateVideo(
 
 
 
+
+
     console.log(
+
         "MEDIA READY"
+
     );
 
 
@@ -485,8 +646,12 @@ async function generateVideo(
 
 
 
+
+
     for(
+
         const scene of script.scenes
+
     ){
 
 
@@ -505,31 +670,17 @@ async function generateVideo(
 
 
 
-        const style =
-
-        selectVoiceStyle(
-
-            {
-
-                description:
-
-                scene.narration
-
-            }
-
-        );
-
-
-
 
 
         await generateSceneVoice(
 
             {
 
+
                 text:
 
                 scene.narration,
+
 
 
                 output:
@@ -537,16 +688,33 @@ async function generateVideo(
                 audio,
 
 
-                style,
+
+                style:
+
+                selectVoiceStyle(
+
+                    {
+
+                        description:
+
+                        scene.narration
+
+                    }
+
+                ),
+
 
 
                 sceneIndex:
 
                 scene.id
 
+
             }
 
         );
+
+
 
 
 
@@ -558,7 +726,9 @@ async function generateVideo(
 
         );
 
+
     }
+
 
 
 
@@ -574,6 +744,8 @@ async function generateVideo(
         "voice-raw.wav"
 
     );
+
+
 
 
 
@@ -607,20 +779,14 @@ async function generateVideo(
 
 
 
+
+
     await enhanceAudio(
 
         rawAudio,
 
         finalAudio
 
-    );
-
-
-
-
-
-    console.log(
-        "VOICE READY"
     );
 
 
@@ -638,6 +804,8 @@ async function generateVideo(
         "subtitle.srt"
 
     );
+
+
 
 
 
@@ -673,6 +841,8 @@ async function generateVideo(
 
 
 
+
+
     await renderShort(
 
         mergedVideo,
@@ -684,6 +854,7 @@ async function generateVideo(
         finalVideo
 
     );
+
 
 
 
@@ -702,7 +873,10 @@ async function generateVideo(
 
 
 
+
+
     return finalVideo;
+
 
 }
 
@@ -734,6 +908,8 @@ async function main(){
 
 
 
+
+
     const topics =
 
     await createTopics(
@@ -743,6 +919,8 @@ async function main(){
         count
 
     );
+
+
 
 
 
@@ -760,27 +938,6 @@ async function main(){
 
 
 
-    if(
-
-        topics.length === 0
-
-    ){
-
-        throw new Error(
-            "Planner returned no topics"
-        );
-
-    }
-
-
-
-
-
-
-    const results:string[] = [];
-
-
-
 
 
     for(
@@ -795,8 +952,6 @@ async function main(){
 
 
 
-        const result =
-
         await generateVideo(
 
             topics[i],
@@ -806,27 +961,11 @@ async function main(){
         );
 
 
-
-        results.push(
-
-            result
-
-        );
-
-
     }
 
 
 
 
-
-    console.log(
-
-        "GENERATED FILES",
-
-        results
-
-    );
 
 
 
@@ -845,11 +984,13 @@ async function main(){
 
 
 
+
 main()
 
 .catch(
 
     error => {
+
 
         console.error(
 
@@ -865,11 +1006,8 @@ main()
         );
 
 
-        process.exit(
+        process.exit(1);
 
-            1
-
-        );
 
     }
 
