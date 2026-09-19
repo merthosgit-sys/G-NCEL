@@ -1,15 +1,24 @@
 import "dotenv/config";
 
+
 import {
+
     GoogleGenAI
+
 }
+
 from "@google/genai";
 
 
+
 import {
+
     generateGroqScript
+
 }
+
 from "./groq.js";
+
 
 
 import {
@@ -19,7 +28,10 @@ import {
     validateScriptJSON
 
 }
+
 from "./json-cleaner.js";
+
+
 
 
 
@@ -35,25 +47,25 @@ process.env.GEMINI_API_KEY;
 
 
 
-if(!apiKey){
-
-    throw new Error(
-        "GEMINI_API_KEY missing"
-    );
-
-}
-
 
 
 
 
 const ai =
 
+apiKey
+
+?
+
 new GoogleGenAI({
 
     apiKey
 
-});
+})
+
+:
+
+null;
 
 
 
@@ -74,6 +86,23 @@ export async function generateShortScript(
     try{
 
 
+
+        if(!ai){
+
+            throw new Error(
+
+                "Gemini API key missing"
+
+            );
+
+        }
+
+
+
+
+
+
+
         console.log(
 
             "AI Director: Gemini"
@@ -82,13 +111,20 @@ export async function generateShortScript(
 
 
 
+
+
+
+
         const response =
 
         await ai.models.generateContent({
 
+
+
             model:
 
             "gemini-3.6-flash",
+
 
 
             contents:
@@ -99,7 +135,11 @@ export async function generateShortScript(
 
             )
 
+
+
         });
+
+
 
 
 
@@ -108,6 +148,8 @@ export async function generateShortScript(
         const text =
 
         response.text;
+
+
 
 
 
@@ -127,6 +169,8 @@ export async function generateShortScript(
 
 
 
+
+
         return validateResult(
 
             text
@@ -135,17 +179,41 @@ export async function generateShortScript(
 
 
 
+
+
+
+
     }
 
-    catch(error){
+    catch(error:any){
 
 
 
         console.error(
 
-            "Gemini failed, using Groq"
+            "Gemini failed"
 
         );
+
+
+
+        console.error(
+
+            error?.message ?? error
+
+        );
+
+
+
+
+
+        console.log(
+
+            "Switching to Groq..."
+
+        );
+
+
 
 
 
@@ -154,6 +222,7 @@ export async function generateShortScript(
             topic
 
         );
+
 
 
     }
@@ -189,7 +258,9 @@ function validateResult(
 
 
 
-    const parsed =
+
+
+    const json =
 
     JSON.parse(
 
@@ -201,11 +272,13 @@ function validateResult(
 
 
 
+
+
     if(
 
         !validateScriptJSON(
 
-            parsed
+            json
 
         )
 
@@ -213,11 +286,13 @@ function validateResult(
 
         throw new Error(
 
-            "AI output format invalid"
+            "Invalid Gemini JSON"
 
         );
 
     }
+
+
 
 
 
@@ -246,27 +321,14 @@ function createDirectorPrompt(
 
 return `
 
-Sen profesyonel bir YouTube Shorts AI yönetmenisin.
 
-
-
-Görevin:
+Konu:
 
 ${topic}
 
-konusunda yüksek kaliteli kısa video planı hazırlamak.
 
 
-
-Amaç:
-
-İzleyiciyi ilk 3 saniyede yakalamak.
-
-Videonun sonuna kadar izletmek.
-
-Gerçekçi ve sinematik görüntüler kullanmak.
-
-
+Sen profesyonel YouTube Shorts AI yönetmenisin.
 
 
 
@@ -275,6 +337,7 @@ Sadece JSON döndür.
 
 
 Format:
+
 
 
 {
@@ -296,24 +359,17 @@ Format:
 },
 
 
-
 "scenes":[
-
-
 
 {
 
 "id":1,
 
-
 "duration":6,
-
 
 "narration":"",
 
-
 "visualPrompt":"",
-
 
 "searchQueries":[
 
@@ -325,126 +381,32 @@ Format:
 
 ],
 
-
 "cameraStyle":"",
-
 
 "mood":""
 
 }
 
-
-
 ],
-
 
 
 "fullNarration":""
 
-
 }
-
 
 
 
 
 Kurallar:
 
-
-
-GENEL:
-
 - Türkçe yaz.
-- Tam 6 sahne üret.
-- Her sahne 5-8 saniye arası olsun.
-- Toplam süre Shorts formatına uygun olsun.
-
-
-
-ANLATIM:
-
-- İlk sahne güçlü merak uyandırsın.
-- Basit ama etkileyici anlatım kullan.
-- Gereksiz bilgi doldurma.
-- İzleyiciyi tutacak hikaye yapısı kullan.
-
-
-
-GÖRSELLER:
-
-Her sahne için:
-
-visualPrompt:
-
-gerçekçi film sahnesi gibi yaz.
-
-
-searchQueries:
-
-stok video araması için İngilizce 3 farklı kelime grubu üret.
-
-
-
-Örnek:
-
-Kötü:
-
-"elektrik"
-
-
-İyi:
-
-"Nikola Tesla laboratory"
-
-"Tesla coil electricity sparks"
-
-"historic electrical experiment"
-
-
-
-KAMERA:
-
-Şunlardan uygun olanları kullan:
-
-- cinematic zoom
-- slow motion
-- aerial shot
-- close up
-- tracking shot
-- macro shot
-
-
-
-STİL:
-
-Bilim:
-
-cinematic documentary
-
-
-Teknoloji:
-
-futuristic realistic
-
-
-Tarih:
-
-historical documentary
-
-
-Çocuk:
-
-3D animation
-
-
-
-
-
-Kesinlikle:
-
-- Markdown kullanma.
-- Açıklama yazma.
-- JSON dışında hiçbir şey yazma.
+- 6 sahne oluştur.
+- Her sahne için farklı görsel üret.
+- Her sahneye İngilizce 3 medya arama kelimesi ekle.
+- İlk 3 saniye güçlü hook olsun.
+- Sinematik belgesel tarzı kullan.
+- Markdown yok.
+- JSON dışında cevap verme.
 
 `;
 
