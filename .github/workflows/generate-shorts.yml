@@ -100,7 +100,7 @@ jobs:
 
 
 
-      - name: Install Node Dependencies
+      - name: Install Node Packages
 
         run: |
 
@@ -110,7 +110,7 @@ jobs:
 
 
 
-      - name: Install AI Dependencies
+      - name: Install AI Packages
 
         run: |
 
@@ -127,10 +127,6 @@ jobs:
           pip install torchvision
 
           pip install torchaudio
-
-          pip install setuptools
-
-          pip install wheel
 
 
 
@@ -150,7 +146,7 @@ jobs:
 
 
 
-      - name: Prepare folders
+      - name: Create Output Folders
 
         run: |
 
@@ -184,26 +180,32 @@ jobs:
 
 
 
-      - name: Debug Output
+      - name: Debug Files
 
         if: always()
 
         run: |
 
-          ls -R output
+          echo "===== OUTPUT TREE ====="
+
+          find . -maxdepth 5 -type f | sort
 
 
 
 
 
-      - name: Upload Videos
+      - name: Upload Debug Artifact
+
+        if: always()
 
         uses: actions/upload-artifact@v4
 
         with:
 
-          name: shorts-final
+          name: shorts-debug
 
-          path: output/final/*.mp4
+          path: |
 
-          if-no-files-found: error
+            output/**
+
+          if-no-files-found: warn
