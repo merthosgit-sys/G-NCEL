@@ -1,86 +1,149 @@
 import {
-execFile
+
+    execFile
+
 }
+
 from "child_process";
 
 
 import {
-promisify
+
+    promisify
+
 }
+
 from "util";
 
 
+
+
+
 const exec =
+
 promisify(execFile);
 
 
 
-export async function renderShort(
-
-video:string,
-
-audio:string,
-
-subtitle:string,
-
-output:string
-
-){
-
-
-console.log(
-"Rendering final video..."
-);
 
 
 
-await exec(
-"ffmpeg",
-[
-"-y",
-
-"-i",
-video,
-
-"-i",
-audio,
-
-
-"-vf",
-
-`scale=1080:1920,subtitles=${subtitle}:force_style='FontSize=18,Bold=1,Alignment=2,MarginV=150'`,
-
-
-"-map",
-"0:v",
-
-"-map",
-"1:a",
-
-
-"-c:v",
-"libx264",
-
-"-preset",
-"fast",
-
-
-"-c:a",
-"aac",
-
-"-b:a",
-"192k",
-
-
-"-shortest",
-
-output
-
-]
-);
 
 
 
-return output;
+export async function runFFmpeg(
+
+    args:string[]
+
+):Promise<void>{
+
+
+
+    console.log(
+
+        "FFmpeg:",
+
+        args.join(" ")
+
+    );
+
+
+
+
+
+    await exec(
+
+        "ffmpeg",
+
+        [
+
+            "-y",
+
+            ...args
+
+        ]
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+export async function convertToShortsFormat(
+
+    input:string,
+
+    output:string
+
+):Promise<void>{
+
+
+
+    await runFFmpeg([
+
+
+
+        "-i",
+
+        input,
+
+
+
+        "-vf",
+
+        [
+
+            "scale=1080:1920:force_original_aspect_ratio=increase",
+
+            "crop=1080:1920",
+
+            "eq=contrast=1.05:saturation=1.15",
+
+            "format=yuv420p"
+
+        ].join(","),
+
+
+
+        "-c:v",
+
+        "libx264",
+
+
+
+        "-preset",
+
+        "medium",
+
+
+
+        "-crf",
+
+        "20",
+
+
+
+        "-c:a",
+
+        "aac",
+
+
+
+        "-b:a",
+
+        "192k",
+
+
+
+        output
+
+    ]);
 
 }
