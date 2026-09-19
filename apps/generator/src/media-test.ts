@@ -1,14 +1,32 @@
 import {
- searchVideos
-} from "../../../packages/media-engine/src/pexels.js";
+    searchPexelsVideos
+}
+from "../../../packages/media-engine/src/pexels.js";
 
 
-const videos =
-await searchVideos(
- "old computer"
-);
 
 
-console.log(
- videos.length
-);
+async function test(){
+
+
+    const videos =
+
+    await searchPexelsVideos(
+
+        "technology laboratory"
+
+    );
+
+
+    console.log(
+
+        videos
+
+    );
+
+
+}
+
+
+
+test();
