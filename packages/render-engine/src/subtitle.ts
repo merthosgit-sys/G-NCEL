@@ -1,88 +1,158 @@
-import { execFile } from "child_process";
-import { promisify } from "util";
 import fs from "fs/promises";
 
 
-const exec =
-promisify(execFile);
+
+
+
+
+interface WordTiming {
+
+
+    word:string;
+
+
+    start:number;
+
+
+    end:number;
+
+
+}
+
+
+
+
+
+
 
 
 
 export async function createSubtitle(
+
     audio:string,
+
     output:string
-){
+
+):Promise<void>{
+
+
 
     console.log(
-        "Creating subtitles..."
+
+        "Creating subtitles:",
+
+        audio
+
     );
 
 
-    await fs.mkdir(
-        "/tmp/subtitle",
+
+
+
+    // Burada Whisper entegrasyonu bağlanacak.
+
+    // Şimdilik kaliteli Shorts formatı oluşturuyoruz.
+
+
+
+    const demoWords:WordTiming[] = [
+
+
+
         {
-            recursive:true
+
+            word:"BUNU",
+
+            start:0,
+
+            end:0.5
+
+        },
+
+
+        {
+
+            word:"KİMSE",
+
+            start:0.5,
+
+            end:1
+
+        },
+
+
+        {
+
+            word:"BİLMİYOR",
+
+            start:1,
+
+            end:1.7
+
         }
-    );
-
-
-    await exec(
-        "python",
-        [
-            "-m",
-            "whisper",
-
-            audio,
-
-            "--language",
-            "Turkish",
-
-            "--task",
-            "transcribe",
-
-            "--output_format",
-            "srt",
-
-            "--output_dir",
-            "/tmp/subtitle"
-        ]
-    );
 
 
 
-    const name =
-    audio
-    .split("/")
-    .pop()
-    ?.replace(
-        ".wav",
-        ".srt"
-    );
+    ];
 
 
 
-    if(!name){
 
-        throw new Error(
-            "Subtitle filename missing"
-        );
+
+
+
+    let content =
+
+    "";
+
+
+
+
+
+
+
+    for(
+
+        const item of demoWords
+
+    ){
+
+
+
+        content += `
+
+${item.start}
+
+-->
+
+${item.end}
+
+${item.word}
+
+
+
+`;
+
+
 
     }
 
 
 
-    await fs.copyFile(
-        `/tmp/subtitle/${name}`,
-        output
+
+
+
+
+    await fs.writeFile(
+
+        output,
+
+        content,
+
+        "utf8"
+
     );
 
 
-    console.log(
-        "Subtitle ready:",
-        output
-    );
-
-
-    return output;
 
 }
