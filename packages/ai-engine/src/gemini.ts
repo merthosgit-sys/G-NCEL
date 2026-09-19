@@ -34,6 +34,7 @@ new GoogleGenAI(
 
 
 
+
 export async function generateShortScript(
 
     topic:string
@@ -85,7 +86,7 @@ Kurallar:
 - Tam 6 sahne üret.
 - Her sahne için farklı görsel açıklaması oluştur.
 - Her sahnenin narration metni ayrı olsun.
-- Toplam video süresi 30-60 saniye olsun.
+- Toplam süre 30-60 saniye olsun.
 - Markdown kullanma.
 - Açıklama yazma.
 - Sadece JSON döndür.
@@ -103,10 +104,12 @@ Kurallar:
         {
 
             model:
-            "gemini-2.0-flash",
+
+            "gemini-3.6-flash",
 
 
             contents:
+
             prompt
 
         }
@@ -126,12 +129,10 @@ Kurallar:
     if(!text){
 
         throw new Error(
-            "Gemini empty response"
+            "Gemini returned empty response"
         );
 
     }
-
-
 
 
 
@@ -140,7 +141,6 @@ Kurallar:
     );
 
 }
-
 
 
 
@@ -174,6 +174,5 @@ function cleanJSON(
         )
 
         .trim();
-
 
 }
