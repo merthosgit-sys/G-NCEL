@@ -3,6 +3,13 @@ import "dotenv/config";
 import axios from "axios";
 
 
+import {
+    VideoCandidate
+}
+from "./video-ranker.js";
+
+
+
 
 
 
@@ -30,57 +37,13 @@ if(!apiKey){
 
 
 
-interface PexelsVideo {
-
-
-    id:number;
-
-
-    width:number;
-
-
-    height:number;
-
-
-    duration:number;
-
-
-    title:string;
-
-
-    url:string;
-
-
-    videoUrl:string;
-
-
-}
-
-
-
-
-
-
-
 
 
 export async function searchPexelsVideos(
 
     query:string
 
-):Promise<PexelsVideo[]>{
-
-
-
-    console.log(
-
-        "Pexels search:",
-
-        query
-
-    );
-
-
+):Promise<VideoCandidate[]>{
 
 
 
@@ -92,25 +55,18 @@ export async function searchPexelsVideos(
 
         {
 
-
             headers:{
 
-
-                Authorization:
-
-                apiKey
+                Authorization:apiKey
 
             },
 
 
             params:{
 
-
                 query,
 
-
-                per_page:10,
-
+                per_page:15,
 
                 orientation:"landscape"
 
@@ -125,10 +81,10 @@ export async function searchPexelsVideos(
 
 
 
-
     const videos =
 
     response.data.videos ?? [];
+
 
 
 
@@ -150,15 +106,15 @@ export async function searchPexelsVideos(
 
 
 
-            const bestFile =
+            const best =
 
             files
 
             .filter(
 
-                (file:any)=>
+                (f:any)=>
 
-                file.width >=720
+                f.width >=720
 
             )
 
@@ -180,7 +136,7 @@ export async function searchPexelsVideos(
 
 
 
-            if(!bestFile){
+            if(!best){
 
                 return null;
 
@@ -192,7 +148,6 @@ export async function searchPexelsVideos(
 
             return {
 
-
                 id:
 
                 video.id,
@@ -200,12 +155,12 @@ export async function searchPexelsVideos(
 
                 width:
 
-                bestFile.width,
+                best.width,
 
 
                 height:
 
-                bestFile.height,
+                best.height,
 
 
                 duration:
@@ -225,7 +180,7 @@ export async function searchPexelsVideos(
 
                 videoUrl:
 
-                bestFile.link
+                best.link
 
             };
 
