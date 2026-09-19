@@ -26,7 +26,9 @@ on:
 
 
 
+
 jobs:
+
 
   generate:
 
@@ -36,6 +38,7 @@ jobs:
 
 
     env:
+
 
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
@@ -47,12 +50,17 @@ jobs:
 
 
 
+
+
     steps:
+
 
 
       - name: Checkout
 
         uses: actions/checkout@v4
+
+
 
 
 
@@ -64,7 +72,7 @@ jobs:
 
           node-version: 22
 
-          cache: npm
+
 
 
 
@@ -78,6 +86,8 @@ jobs:
 
 
 
+
+
       - name: Install FFmpeg
 
         run: |
@@ -88,15 +98,19 @@ jobs:
 
 
 
+
+
       - name: Install Node Dependencies
 
         run: |
 
-          npm ci
+          npm install
 
 
 
-      - name: Install Python AI Dependencies
+
+
+      - name: Install AI Dependencies
 
         run: |
 
@@ -120,6 +134,8 @@ jobs:
 
 
 
+
+
       - name: Prepare Piper Voice
 
         run: |
@@ -132,7 +148,9 @@ jobs:
 
 
 
-      - name: Prepare Output
+
+
+      - name: Prepare folders
 
         run: |
 
@@ -144,6 +162,8 @@ jobs:
 
 
 
+
+
       - name: Type Check
 
         run: |
@@ -152,11 +172,27 @@ jobs:
 
 
 
+
+
       - name: Generate Shorts
 
         run: |
 
           npm run generate
+
+
+
+
+
+      - name: Debug Output
+
+        if: always()
+
+        run: |
+
+          ls -R output
+
+
 
 
 
@@ -169,3 +205,5 @@ jobs:
           name: shorts-final
 
           path: output/final/*.mp4
+
+          if-no-files-found: error
