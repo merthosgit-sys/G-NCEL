@@ -1,38 +1,115 @@
-import axios from "axios";
 import fs from "fs/promises";
-import path from "path";
+import axios from "axios";
+
+
+
+
+
+
+
+interface MediaVideo {
+
+
+    videoUrl:string;
+
+
+    id:number;
+
+
+}
+
+
+
+
+
+
+
 
 
 export async function downloadVideo(
-url:string,
-output:string
-){
 
-await fs.mkdir(
-path.dirname(output),
-{
-recursive:true
-}
-);
+    media:MediaVideo,
 
+    output:string
 
-const response =
-await axios.get(
-url,
-{
-responseType:"arraybuffer"
-}
-);
+):Promise<string>{
 
 
 
-await fs.writeFile(
-output,
-response.data
-);
+    console.log(
+
+        "Downloading video:",
+
+        media.id
+
+    );
 
 
 
-return output;
+
+
+    if(!media.videoUrl){
+
+        throw new Error(
+
+            "Video URL missing"
+
+        );
+
+    }
+
+
+
+
+
+    const response =
+
+    await axios.get(
+
+        media.videoUrl,
+
+        {
+
+            responseType:
+
+            "arraybuffer"
+
+        }
+
+    );
+
+
+
+
+
+    await fs.writeFile(
+
+        output,
+
+        Buffer.from(
+
+            response.data
+
+        )
+
+    );
+
+
+
+
+
+    console.log(
+
+        "Saved:",
+
+        output
+
+    );
+
+
+
+
+
+    return output;
 
 }
