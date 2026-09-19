@@ -3,6 +3,15 @@ import "dotenv/config";
 import OpenAI from "openai";
 
 
+import {
+    cleanAIJson,
+    validateScriptJSON
+}
+from "./json-cleaner.js";
+
+
+
+
 
 
 
@@ -17,10 +26,13 @@ process.env.GROQ_API_KEY;
 if(!apiKey){
 
     throw new Error(
+
         "GROQ_API_KEY missing"
+
     );
 
 }
+
 
 
 
@@ -37,8 +49,6 @@ new OpenAI({
     "https://api.groq.com/openai/v1"
 
 });
-
-
 
 
 
@@ -82,13 +92,13 @@ export async function generateGroqScript(
 
 
 
-        try{
+        try {
 
 
 
             console.log(
 
-                "Trying Groq model:",
+                "Trying:",
 
                 model
 
@@ -116,7 +126,7 @@ export async function generateGroqScript(
 
                         content:
 
-                        createPrompt(topic)
+                        prompt(topic)
 
                     }
 
@@ -129,8 +139,6 @@ export async function generateGroqScript(
                 0.8
 
             });
-
-
 
 
 
@@ -150,8 +158,6 @@ export async function generateGroqScript(
 
 
 
-
-
             if(!text){
 
                 throw new Error(
@@ -166,11 +172,55 @@ export async function generateGroqScript(
 
 
 
+            const cleaned =
+
+            cleanAIJson(
+
+                text
+
+            );
+
+
+
+
+
+            const parsed =
+
+            JSON.parse(
+
+                cleaned
+
+            );
+
+
+
+
+
+            if(
+
+                !validateScriptJSON(
+
+                    parsed
+
+                )
+
+            ){
+
+                throw new Error(
+
+                    "Invalid Groq JSON"
+
+                );
+
+            }
+
+
+
 
 
             console.log(
 
-                "Groq model success:",
+                "Success:",
 
                 model
 
@@ -180,13 +230,7 @@ export async function generateGroqScript(
 
 
 
-            return cleanJSON(
-
-                text
-
-            );
-
-
+            return cleaned;
 
 
 
@@ -198,9 +242,9 @@ export async function generateGroqScript(
 
             console.error(
 
-                "Groq failed:",
+                model,
 
-                model
+                "failed"
 
             );
 
@@ -209,13 +253,9 @@ export async function generateGroqScript(
             lastError = error;
 
 
-
         }
 
-
     }
-
-
 
 
 
@@ -232,19 +272,16 @@ export async function generateGroqScript(
 
 
 
-
-function createPrompt(
+function prompt(
 
     topic:string
 
 ){
 
 
-
 return `
 
 Sen profesyonel YouTube Shorts senaristisin.
-
 
 
 Konu:
@@ -253,17 +290,14 @@ ${topic}
 
 
 
-Sadece JSON formatında cevap ver.
-
+Sadece JSON döndür.
 
 
 Format:
 
-
 {
 "title":"",
 "hook":"",
-
 "scenes":[
 
 {
@@ -274,62 +308,20 @@ Format:
 }
 
 ],
-
 "fullNarration":""
-
 }
 
 
 
 Kurallar:
 
-- Türkçe yaz.
-- Tam 6 sahne üret.
-- Her sahnede farklı görsel açıklaması olsun.
-- İlk 3 saniye güçlü merak oluşturmalı.
-- Bilim, teknoloji, tarih ve ilginç bilgiler kanalına uygun yaz.
-- İzleyiciyi videonun sonuna kadar tutacak anlatım kullan.
-- Markdown kullanma.
-- Açıklama ekleme.
-- Sadece JSON döndür.
+- Türkçe.
+- 6 sahne.
+- Her sahnede farklı görsel açıklaması.
+- Bilim teknoloji tarih içerikleri.
+- Merak uyandıran anlatım.
+- Markdown yok.
 
 `;
-
-}
-
-
-
-
-
-
-
-
-function cleanJSON(
-
-    value:string
-
-):string{
-
-
-    return value
-
-    .replace(
-
-        /```json/g,
-
-        ""
-
-    )
-
-    .replace(
-
-        /```/g,
-
-        ""
-
-    )
-
-    .trim();
-
 
 }
