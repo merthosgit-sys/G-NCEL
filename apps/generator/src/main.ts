@@ -68,7 +68,10 @@ interface ShortScript {
 
 
 
-const count = Number(
+
+
+const count =
+Number(
     process.env.SHORTS_COUNT ?? "1"
 );
 
@@ -81,32 +84,39 @@ process.env.SHORTS_TOPIC ?? "teknoloji";
 
 
 
-async function ensureFolders(){
 
-    await fs.mkdir(
+
+async function prepareFolders(){
+
+    const folders = [
+
+        "output",
+
         "output/final",
-        {
-            recursive:true
-        }
-    );
 
-
-    await fs.mkdir(
         "output/work",
-        {
-            recursive:true
-        }
-    );
+
+        "output/audio"
+
+    ];
 
 
-    await fs.mkdir(
-        "output/audio",
-        {
-            recursive:true
-        }
-    );
+
+    for(
+        const folder of folders
+    ){
+
+        await fs.mkdir(
+            folder,
+            {
+                recursive:true
+            }
+        );
+
+    }
 
 }
+
 
 
 
@@ -120,31 +130,40 @@ async function mergeAudioFiles(
 
     output:string
 
-){
+):Promise<void>{
+
+
 
     if(files.length === 0){
 
         throw new Error(
-            "No audio files generated"
+            "Audio list empty"
         );
 
     }
+
 
 
     const listPath =
     "output/audio-list.txt";
 
 
+
+    const content =
+    files
+    .map(
+        file =>
+        `file '${path.resolve(file)}'`
+    )
+    .join("\n");
+
+
+
     await fs.writeFile(
 
         listPath,
 
-        files
-        .map(
-            file =>
-            `file '${file}'`
-        )
-        .join("\n"),
+        content,
 
         "utf8"
 
@@ -152,21 +171,36 @@ async function mergeAudioFiles(
 
 
 
+
+
     const {
+
         execFile
+
     } = await import(
         "child_process"
     );
 
 
+
     const {
+
         promisify
+
     } = await import(
         "util"
     );
 
 
-    await promisify(execFile)(
+
+    const exec =
+    promisify(execFile);
+
+
+
+
+
+    await exec(
 
         "ffmpeg",
 
@@ -186,9 +220,9 @@ async function mergeAudioFiles(
 
             listPath,
 
-            "-c",
+            "-c:a",
 
-            "copy",
+            "pcm_s16le",
 
             output
 
@@ -196,7 +230,12 @@ async function mergeAudioFiles(
 
     );
 
+
 }
+
+
+
+
 
 
 
@@ -208,17 +247,21 @@ async function generateVideo(
 
     index:number
 
-){
+):Promise<string>{
+
+
 
     console.log(
         "===================="
     );
 
 
+
     console.log(
         "VIDEO",
         index
     );
+
 
 
     console.log(
@@ -228,7 +271,10 @@ async function generateVideo(
 
 
 
+
+
     const scriptText =
+
     await generateShortScript(
         topic
     );
@@ -241,51 +287,83 @@ async function generateVideo(
 
 
 
+
+
     const script =
+
     JSON.parse(
         scriptText
     ) as ShortScript;
 
 
 
+
+
     if(
-        !script.scenes ||
+        !Array.isArray(script.scenes) ||
         script.scenes.length === 0
     ){
 
         throw new Error(
-            "Gemini returned no scenes"
+            "No scenes returned from Gemini"
         );
 
     }
 
 
 
+
+
+
+
     const folder =
-    `output/work/${index}`;
+
+    path.join(
+
+        "output",
+
+        "work",
+
+        String(index)
+
+    );
+
+
 
 
 
     await fs.mkdir(
+
         folder,
+
         {
             recursive:true
         }
+
     );
+
+
 
 
 
     await fs.writeFile(
 
         path.join(
+
             folder,
+
             "script.json"
+
         ),
 
         JSON.stringify(
+
             script,
+
             null,
+
             2
+
         ),
 
         "utf8"
@@ -294,52 +372,84 @@ async function generateVideo(
 
 
 
+
+
     console.log(
-        "DOWNLOADING VIDEOS"
+        "FETCHING MEDIA"
     );
+
+
 
 
 
     const clips =
+
     await fetchMultipleScenes(
+
         script.scenes,
+
         folder
+
     );
+
+
 
 
 
     if(clips.length === 0){
 
         throw new Error(
-            "No video clips downloaded"
+            "No media clips created"
         );
 
     }
 
 
 
+
+
+
+
     const mergedVideo =
+
     path.join(
+
         folder,
+
         "merged.mp4"
+
     );
+
+
 
 
 
     await concatVideos(
+
         clips,
+
         mergedVideo
+
     );
+
+
 
 
 
     console.log(
-        "VIDEOS MERGED"
+        "MEDIA READY"
     );
 
 
 
-    const audios:string[] = [];
+
+
+
+
+
+    const sceneAudios:string[] = [];
+
+
 
 
 
@@ -347,113 +457,223 @@ async function generateVideo(
         const scene of script.scenes
     ){
 
+
+
         const audio =
+
         path.join(
+
             folder,
+
             `scene-${scene.id}.wav`
+
         );
+
+
+
+
+
+        const style =
+
+        selectVoiceStyle(
+
+            {
+
+                description:
+
+                scene.narration
+
+            }
+
+        );
+
+
+
 
 
         await generateSceneVoice(
+
             {
 
                 text:
+
                 scene.narration,
 
+
                 output:
+
                 audio,
 
-                style:
-                selectVoiceStyle(
-                    {
-                        description:
-                        scene.narration
-                    }
-                ),
+
+                style,
+
 
                 sceneIndex:
+
                 scene.id
 
             }
+
         );
 
 
-        audios.push(
+
+
+
+        sceneAudios.push(
+
             audio
+
         );
 
     }
 
 
 
+
+
+
     const rawAudio =
+
     path.join(
+
         folder,
+
         "voice-raw.wav"
+
     );
+
+
 
 
 
     await mergeAudioFiles(
-        audios,
+
+        sceneAudios,
+
         rawAudio
+
     );
+
+
+
+
 
 
 
     const finalAudio =
+
     path.join(
+
         folder,
+
         "voice.wav"
+
     );
+
+
 
 
 
     await enhanceAudio(
+
         rawAudio,
+
         finalAudio
+
     );
 
 
-
-    const subtitle =
-    path.join(
-        folder,
-        "subtitle.srt"
-    );
-
-
-
-    await createSubtitle(
-        finalAudio,
-        subtitle
-    );
-
-
-
-    const output =
-    `output/final/short-${index}.mp4`;
-
-
-
-    await renderShort(
-        mergedVideo,
-        finalAudio,
-        subtitle,
-        output
-    );
 
 
 
     console.log(
-        "FINAL CREATED",
-        output
+        "VOICE READY"
     );
 
 
-    return output;
+
+
+
+
+
+    const subtitle =
+
+    path.join(
+
+        folder,
+
+        "subtitle.srt"
+
+    );
+
+
+
+
+
+    await createSubtitle(
+
+        finalAudio,
+
+        subtitle
+
+    );
+
+
+
+
+
+
+
+    const finalVideo =
+
+    path.join(
+
+        "output",
+
+        "final",
+
+        `short-${index}.mp4`
+
+    );
+
+
+
+
+
+    await renderShort(
+
+        mergedVideo,
+
+        finalAudio,
+
+        subtitle,
+
+        finalVideo
+
+    );
+
+
+
+
+
+
+    console.log(
+
+        "CREATED",
+
+        finalVideo
+
+    );
+
+
+
+
+
+    return finalVideo;
 
 }
+
 
 
 
@@ -465,79 +685,160 @@ async function generateVideo(
 async function main(){
 
 
-    await ensureFolders();
+
+    await prepareFolders();
+
+
 
 
 
     console.log(
+
         "===== SHORTS FACTORY V4 ====="
+
     );
+
+
 
 
 
     const topics =
+
     await createTopics(
+
         mainTopic,
+
         count
+
     );
+
+
 
 
 
     console.log(
-        "TOPICS:",
+
+        "TOPICS",
+
         topics
+
     );
 
 
 
-    if(topics.length === 0){
+
+
+    if(
+
+        topics.length === 0
+
+    ){
 
         throw new Error(
-            "No topics generated"
+            "Planner returned no topics"
         );
 
     }
+
+
+
+
+
+
+    const results:string[] = [];
+
+
 
 
 
     for(
-        let i=0;
-        i<topics.length;
+
+        let i = 0;
+
+        i < topics.length;
+
         i++
+
     ){
 
+
+
+        const result =
+
         await generateVideo(
+
             topics[i],
-            i+1
+
+            i + 1
+
         );
+
+
+
+        results.push(
+
+            result
+
+        );
+
 
     }
 
 
 
+
+
     console.log(
-        "ALL DONE"
+
+        "GENERATED FILES",
+
+        results
+
     );
+
+
+
+    console.log(
+
+        "ALL DONE"
+
+    );
+
 
 }
 
 
 
+
+
+
+
 main()
+
 .catch(
+
     error => {
 
         console.error(
-            "GENERATION FAILED"
+
+            "PIPELINE FAILED"
+
         );
 
 
         console.error(
+
             error
+
         );
 
 
-        process.exit(1);
+        process.exit(
+
+            1
+
+        );
 
     }
+
 );
