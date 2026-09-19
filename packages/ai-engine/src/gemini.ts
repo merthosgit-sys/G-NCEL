@@ -6,6 +6,14 @@ import {
 from "@google/genai";
 
 
+import {
+    generateGroqScript
+}
+from "./groq.js";
+
+
+
+
 
 const apiKey =
 process.env.GEMINI_API_KEY;
@@ -23,11 +31,13 @@ if(!apiKey){
 
 
 const ai =
-new GoogleGenAI(
-    {
-        apiKey
-    }
-);
+new GoogleGenAI({
+
+    apiKey
+
+});
+
+
 
 
 
@@ -43,7 +53,136 @@ export async function generateShortScript(
 
 
 
-    const prompt = `
+    console.log(
+        "AI SCRIPT GENERATION:",
+        topic
+    );
+
+
+
+    try {
+
+
+
+        console.log(
+            "Trying Gemini..."
+        );
+
+
+
+        const result =
+
+        await ai.models.generateContent({
+
+            model:
+
+            "gemini-3.6-flash",
+
+
+            contents:
+
+            createPrompt(topic)
+
+        });
+
+
+
+
+
+        const text =
+
+        result.text;
+
+
+
+        if(!text){
+
+            throw new Error(
+                "Gemini empty response"
+            );
+
+        }
+
+
+
+        console.log(
+            "Gemini success"
+        );
+
+
+
+        return cleanJSON(
+            text
+        );
+
+
+
+    }
+
+    catch(error:any){
+
+
+
+        console.error(
+            "Gemini failed:"
+        );
+
+
+        console.error(
+            error?.message ?? error
+        );
+
+
+
+        console.log(
+            "Switching to Groq fallback..."
+        );
+
+
+
+        const fallback =
+
+        await generateGroqScript(
+
+            topic
+
+        );
+
+
+
+        console.log(
+            "Groq success"
+        );
+
+
+
+        return cleanJSON(
+            fallback
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+function createPrompt(
+
+    topic:string
+
+){
+
+
+
+return `
 
 Sen profesyonel YouTube Shorts senaristisin.
 
@@ -57,7 +196,9 @@ ${topic}
 Sadece JSON döndür.
 
 
+
 Format:
+
 
 {
 "title":"",
@@ -84,63 +225,18 @@ Kurallar:
 
 - Türkçe yaz.
 - Tam 6 sahne üret.
-- Her sahne için farklı görsel açıklaması oluştur.
-- Her sahnenin narration metni ayrı olsun.
-- Toplam süre 30-60 saniye olsun.
+- Her sahne için ayrı görsel açıklaması yaz.
+- Bilim, teknoloji ve tarih kanalı formatında hazırla.
+- İlk 3 saniyede güçlü merak oluştur.
+- Anlatım doğal ve akıcı olsun.
 - Markdown kullanma.
 - Açıklama yazma.
 - Sadece JSON döndür.
 
 `;
 
-
-
-
-
-    const response =
-
-    await ai.models.generateContent(
-
-        {
-
-            model:
-
-            "gemini-3.6-flash",
-
-
-            contents:
-
-            prompt
-
-        }
-
-    );
-
-
-
-
-
-    const text =
-
-    response.text;
-
-
-
-    if(!text){
-
-        throw new Error(
-            "Gemini returned empty response"
-        );
-
-    }
-
-
-
-    return cleanJSON(
-        text
-    );
-
 }
+
 
 
 
@@ -155,24 +251,26 @@ function cleanJSON(
 ):string{
 
 
+
     return value
 
-        .replace(
+    .replace(
 
-            /```json/g,
+        /```json/g,
 
-            ""
+        ""
 
-        )
+    )
 
-        .replace(
+    .replace(
 
-            /```/g,
+        /```/g,
 
-            ""
+        ""
 
-        )
+    )
 
-        .trim();
+    .trim();
+
 
 }
