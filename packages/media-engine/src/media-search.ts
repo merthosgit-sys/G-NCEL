@@ -1,26 +1,22 @@
 import {
     expandKeywords
-}
-from "./keyword-expander.js";
+} from "./keyword-expander.js";
 
 
 import {
     cleanKeywords
-}
-from "./keyword-cleaner.js";
+} from "./keyword-cleaner.js";
 
 
 import {
     rankVideos,
     VideoCandidate
-}
-from "./video-ranker.js";
+} from "./video-ranker.js";
 
 
 import {
     searchPexelsVideos
-}
-from "./pexels.js";
+} from "./pexels.js";
 
 
 
@@ -36,11 +32,21 @@ export async function findBestMedia(
 
 
 
-    const queries =
+    const expanded =
 
     expandKeywords(
 
         scene.searchQueries ?? []
+
+    );
+
+
+
+    const queries =
+
+    cleanKeywords(
+
+        expanded
 
     );
 
@@ -53,6 +59,8 @@ export async function findBestMedia(
         queries
 
     );
+
+
 
 
 
@@ -71,7 +79,6 @@ export async function findBestMedia(
 
 
         try{
-
 
 
             const result =
@@ -106,14 +113,10 @@ export async function findBestMedia(
 
             );
 
-
-
         }
 
 
-
     }
-
 
 
 
@@ -137,12 +140,41 @@ export async function findBestMedia(
 
 
 
-
     const ranked =
 
     rankVideos(
 
         videos
+
+    );
+
+
+
+
+
+    if(
+
+        !ranked[0]
+
+    ){
+
+        throw new Error(
+
+            "Ranking failed"
+
+        );
+
+    }
+
+
+
+
+
+    console.log(
+
+        "BEST MEDIA:",
+
+        ranked[0].url
 
     );
 
