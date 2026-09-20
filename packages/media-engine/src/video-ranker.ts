@@ -1,205 +1,109 @@
 export interface VideoCandidate {
 
-
     id:number;
-
 
     width:number;
 
-
     height:number;
-
 
     duration:number;
 
-
     title:string;
-
 
     url:string;
 
-
     videoUrl:string;
 
-
 }
-
-
-
-
 
 
 
 export function rankVideos(
 
-    videos:VideoCandidate[]
+videos:VideoCandidate[]
 
 ):VideoCandidate[]{
 
 
+return videos
 
-    return videos
+.map(video=>({
 
-    .map(
+    video,
 
-        video => ({
+    score:
 
+    scoreVideo(video)
 
-            video,
-
-
-            score:
-
-            calculateScore(
-
-                video
-
-            )
+}))
 
 
-        })
+.sort(
 
-    )
+(a,b)=>
 
+b.score-a.score
 
-    .sort(
-
-        (
-
-            a,
-
-            b
-
-        ) =>
-
-        b.score -
-
-        a.score
-
-    )
+)
 
 
-    .map(
+.map(
 
-        item =>
+x=>x.video
 
-        item.video
-
-    );
+);
 
 
 }
 
 
 
+function scoreVideo(
 
+video:VideoCandidate
 
+){
 
 
+let score=0;
 
 
-function calculateScore(
 
-    video:VideoCandidate
+// Shorts dikey
 
-):number{
+if(video.height > video.width){
 
+score+=50;
 
+}
 
-    let score = 0;
 
+// yüksek çözünürlük
 
+if(video.height>=1920){
 
+score+=30;
 
+}
 
-    // yüksek çözünürlük
+else if(video.height>=1080){
 
-    if(
+score+=20;
 
-        video.width >=1920
+}
 
-    ){
 
-        score +=30;
+// ideal süre
 
-    }
+if(video.duration>=5 && video.duration<=30){
 
-    else if(
+score+=20;
 
-        video.width >=1280
+}
 
-    ){
 
-        score +=20;
 
-    }
+return score;
 
-
-
-
-
-
-
-    // Shorts için uygun süre
-
-    if(
-
-        video.duration >=5 &&
-
-        video.duration <=30
-
-    ){
-
-        score +=25;
-
-    }
-
-
-
-
-
-
-
-    // Dikey videoya öncelik
-
-    if(
-
-        video.height >
-
-        video.width
-
-    ){
-
-        score +=30;
-
-    }
-
-
-
-
-
-
-
-    // Başlık varsa
-
-    if(
-
-        video.title &&
-
-        video.title.length >0
-
-    ){
-
-        score +=15;
-
-    }
-
-
-
-
-
-
-
-    return score;
 
 }
