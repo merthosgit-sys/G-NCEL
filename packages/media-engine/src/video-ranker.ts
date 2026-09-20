@@ -28,6 +28,7 @@ export interface VideoCandidate {
 
 
 
+
 export function rankVideos(
 
     videos:VideoCandidate[],
@@ -38,7 +39,21 @@ export function rankVideos(
 
 
 
-    return videos
+
+
+    const uniqueVideos =
+
+    removeDuplicates(
+
+        videos
+
+    );
+
+
+
+
+
+    return uniqueVideos
 
     .map(
 
@@ -78,6 +93,48 @@ export function rankVideos(
         item =>
 
         item.video
+
+    );
+
+}
+
+
+
+
+
+function removeDuplicates(
+
+    videos:VideoCandidate[]
+
+){
+
+
+    const seen = new Set<number>();
+
+
+    return videos.filter(
+
+        video => {
+
+
+            if(
+
+                seen.has(video.id)
+
+            ){
+
+                return false;
+
+            }
+
+
+            seen.add(video.id);
+
+
+            return true;
+
+
+        }
 
     );
 
@@ -124,28 +181,20 @@ function calculateScore(
 
 
 
-    const queryText =
-
-    keywords
-
-    .join(" ")
-
-    .toLowerCase();
-
-
-
-
-
 
 
     /*
-       Keyword uyumu
+        Keyword eşleşmesi
     */
 
 
     const words =
 
-    queryText
+    keywords
+
+    .join(" ")
+
+    .toLowerCase()
 
     .split(/\s+/)
 
@@ -158,6 +207,10 @@ function calculateScore(
     );
 
 
+
+
+
+    let keywordMatches = 0;
 
 
 
@@ -174,7 +227,7 @@ function calculateScore(
 
         ){
 
-            score += 10;
+            keywordMatches++;
 
         }
 
@@ -184,9 +237,18 @@ function calculateScore(
 
 
 
+    score +=
+
+    keywordMatches * 12;
+
+
+
+
+
+
 
     /*
-       Shorts dikey avantajı
+        Shorts format
     */
 
 
@@ -198,22 +260,27 @@ function calculateScore(
 
     ){
 
-        score +=40;
+        score +=50;
 
     }
 
     else{
 
-        score -=30;
+
+        score -=40;
+
 
     }
+
+
+
 
 
 
 
 
     /*
-       Çözünürlük
+        Çözünürlük
     */
 
 
@@ -229,11 +296,21 @@ function calculateScore(
 
     else if(
 
+        video.height >=1440
+
+    ){
+
+        score +=30;
+
+    }
+
+    else if(
+
         video.height >=1080
 
     ){
 
-        score +=25;
+        score +=20;
 
     }
 
@@ -254,9 +331,9 @@ function calculateScore(
 
 
     /*
-       Süre
+        Süre
 
-       Shorts için ideal
+        Shorts için ideal
     */
 
 
@@ -268,16 +345,39 @@ function calculateScore(
 
     ){
 
-        score +=15;
+        score +=20;
 
     }
 
-    else{
+    else if(
 
-        score -=10;
+        video.duration >120
+
+    ){
+
+        score -=20;
 
     }
 
+
+
+
+
+
+    /*
+        Çok küçük videoları düşür
+    */
+
+
+    if(
+
+        video.width <500
+
+    ){
+
+        score -=30;
+
+    }
 
 
 
