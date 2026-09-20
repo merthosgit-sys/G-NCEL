@@ -27,9 +27,12 @@ export interface VideoCandidate {
 
 
 
+
 export function rankVideos(
 
-videos:VideoCandidate[]
+    videos:VideoCandidate[],
+
+    keywords:string[] = []
 
 ):VideoCandidate[]{
 
@@ -37,18 +40,28 @@ videos:VideoCandidate[]
 
     return videos
 
-    .map(video=>({
+    .map(
+
+        video => ({
 
 
-        video,
+            video,
 
 
-        score:
+            score:
 
-        calculateScore(video)
+            calculateScore(
+
+                video,
+
+                keywords
+
+            )
 
 
-    }))
+        })
+
+    )
 
 
     .sort(
@@ -62,11 +75,12 @@ videos:VideoCandidate[]
 
     .map(
 
-        item=>
+        item =>
 
         item.video
 
     );
+
 
 }
 
@@ -74,18 +88,107 @@ videos:VideoCandidate[]
 
 
 
+
+
 function calculateScore(
 
-video:VideoCandidate
+    video:VideoCandidate,
+
+    keywords:string[]
 
 ):number{
+
 
 
     let score = 0;
 
 
 
-    // Shorts dikey video
+
+
+    const text =
+
+    (
+
+        video.title +
+
+        " " +
+
+        video.url
+
+    )
+
+    .toLowerCase();
+
+
+
+
+
+    const queryText =
+
+    keywords
+
+    .join(" ")
+
+    .toLowerCase();
+
+
+
+
+
+
+
+    /*
+       Keyword uyumu
+    */
+
+
+    const words =
+
+    queryText
+
+    .split(/\s+/)
+
+    .filter(
+
+        word =>
+
+        word.length > 2
+
+    );
+
+
+
+
+
+    for(
+
+        const word of words
+
+    ){
+
+
+        if(
+
+            text.includes(word)
+
+        ){
+
+            score += 10;
+
+        }
+
+
+    }
+
+
+
+
+
+    /*
+       Shorts dikey avantajı
+    */
+
 
     if(
 
@@ -95,21 +198,32 @@ video:VideoCandidate
 
     ){
 
-        score +=50;
+        score +=40;
+
+    }
+
+    else{
+
+        score -=30;
 
     }
 
 
 
-    // kalite
+
+
+    /*
+       Çözünürlük
+    */
+
 
     if(
 
-        video.height >=1920
+        video.height >=2160
 
     ){
 
-        score+=30;
+        score +=40;
 
     }
 
@@ -119,13 +233,32 @@ video:VideoCandidate
 
     ){
 
-        score+=20;
+        score +=25;
+
+    }
+
+    else if(
+
+        video.height >=720
+
+    ){
+
+        score +=10;
 
     }
 
 
 
-    // ideal shorts süresi
+
+
+
+
+    /*
+       Süre
+
+       Shorts için ideal
+    */
+
 
     if(
 
@@ -135,12 +268,22 @@ video:VideoCandidate
 
     ){
 
-        score+=20;
+        score +=15;
+
+    }
+
+    else{
+
+        score -=10;
 
     }
 
 
 
+
+
+
     return score;
+
 
 }
