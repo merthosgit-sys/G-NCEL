@@ -1,25 +1,18 @@
 import {
 
-    generateXTTS,
-
-    generatePiperVoice
+    generateXTTS
 
 }
 from "./index.js";
 
 
 
-
 export type VoiceStyle =
 
     | "excited"
-
     | "documentary"
-
     | "mysterious"
-
     | "neutral";
-
 
 
 
@@ -44,8 +37,6 @@ export interface GenerateSceneVoiceInput {
 
 
 
-
-
 export async function generateSceneVoice(
 
     input:GenerateSceneVoiceInput
@@ -54,57 +45,29 @@ export async function generateSceneVoice(
 
 
 
-    try {
-
-
-        await generateXTTS(
-
-            input.text,
-
-            input.output,
-
-            input.style
-
-        );
+    console.log(
+        `Generating XTTS scene ${input.sceneIndex}`
+    );
 
 
 
-        console.log(
+    await generateXTTS(
 
-            `XTTS scene ${input.sceneIndex} OK`
+        input.text,
 
-        );
+        input.output,
 
+        input.style
 
-
-    }
-
-
-    catch(error){
+    );
 
 
 
-        console.error(
+    console.log(
 
-            `XTTS scene ${input.sceneIndex} failed`
+        `XTTS scene ${input.sceneIndex} OK`
 
-        );
-
-
-
-        await generatePiperVoice(
-
-            input.text,
-
-            input.output,
-
-            input.sceneIndex
-
-        );
-
-
-
-    }
+    );
 
 
 
