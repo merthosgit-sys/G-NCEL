@@ -1,29 +1,129 @@
 export function expandKeywords(
 
-queries:string[]
+    queries:string[]
 
 ):string[]{
 
 
-const result:string[]=[];
+
+    const result = new Set<string>();
 
 
 
-for(const q of queries){
+    for(
+
+        const query of queries
+
+    ){
 
 
-if(!result.includes(q)){
-
-result.push(q);
-
-}
-
-
-}
+        result.add(query);
 
 
 
-return result.slice(0,6);
+        const lower =
 
+        query.toLowerCase();
+
+
+
+        if(
+
+            lower.includes("tesla")
+
+        ){
+
+            result.add(
+
+                "Tesla laboratory"
+
+            );
+
+
+            result.add(
+
+                "Tesla coil"
+
+            );
+
+
+            result.add(
+
+                "wireless electricity"
+
+            );
+
+        }
+
+
+
+
+        if(
+
+            lower.includes("car")
+
+            ||
+
+            lower.includes("automobile")
+
+        ){
+
+
+            result.add(
+
+                "classic car history"
+
+            );
+
+
+            result.add(
+
+                "old automobile"
+
+            );
+
+
+            result.add(
+
+                "vintage engine"
+
+            );
+
+
+        }
+
+
+
+
+        if(
+
+            lower.includes("space")
+
+        ){
+
+
+            result.add(
+
+                "space documentary"
+
+            );
+
+
+            result.add(
+
+                "planet earth"
+
+            );
+
+
+        }
+
+
+
+    }
+
+
+
+    return Array.from(result);
 
 }
