@@ -1,6 +1,8 @@
 import os
 
 os.environ["COQUI_TOS_AGREED"] = "1"
+
+
 import argparse
 import torch
 
@@ -10,19 +12,22 @@ from TTS.api import TTS
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument(
-"--text",
-required=True
-)
 
 parser.add_argument(
-"--output",
-required=True
+    "--text",
+    required=True
 )
 
+
 parser.add_argument(
-"--style",
-default="neutral"
+    "--output",
+    required=True
+)
+
+
+parser.add_argument(
+    "--style",
+    default="neutral"
 )
 
 
@@ -33,21 +38,32 @@ args = parser.parse_args()
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
+print("Generating Turkish voice...")
+print("Device:", device)
+print("Style:", args.style)
+
+
 
 tts = TTS(
-"tts_models/multilingual/multi-dataset/xtts_v2"
+    "tts_models/multilingual/multi-dataset/xtts_v2"
 ).to(device)
 
 
 
 tts.tts_to_file(
 
-text=args.text,
+    text=args.text,
 
-file_path=args.output,
+    file_path=args.output,
 
-speaker_wav=None,
+    speaker_wav=None,
 
-language="tr"
+    language="tr"
 
+)
+
+
+print(
+    "Voice saved:",
+    args.output
 )
