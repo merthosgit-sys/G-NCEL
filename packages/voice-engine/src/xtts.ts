@@ -1,29 +1,108 @@
-import { execFile } from "child_process";
-import { promisify } from "util";
+import { spawn } from "child_process";
+import readline from "readline";
 import fs from "fs/promises";
 
 
-const exec = promisify(execFile);
+
+let pythonProcess:any = null;
+
+
+let ready = false;
 
 
 
-let xttsReady = false;
+const queue:any[] = [];
 
 
 
-export async function loadXTTS(){
+function startXTTS(){
 
-    if(xttsReady){
+
+    if(pythonProcess){
+
         return;
+
     }
 
 
-    console.log(
-        "XTTS model ready"
+
+    pythonProcess = spawn(
+
+        "python",
+
+        [
+
+            "scripts/xtts_server.py"
+
+        ]
+
     );
 
 
-    xttsReady = true;
+
+    const rl = readline.createInterface({
+
+        input:
+
+        pythonProcess.stdout
+
+    });
+
+
+
+    rl.on(
+
+        "line",
+
+        line => {
+
+
+            console.log(
+
+                "XTTS:",
+                line
+
+            );
+
+
+
+            if(line.includes(
+
+                "XTTS MODEL READY"
+
+            )){
+
+
+                ready = true;
+
+            }
+
+
+        }
+
+    );
+
+
+
+    pythonProcess.stderr.on(
+
+        "data",
+
+        data=>{
+
+
+            console.error(
+
+                data.toString()
+
+            );
+
+
+        }
+
+    );
+
+
 
 }
 
@@ -43,7 +122,20 @@ export async function generateXTTS(
 
 
 
-    await loadXTTS();
+    startXTTS();
+
+
+
+    while(!ready){
+
+
+        await new Promise(
+
+            r=>setTimeout(r,1000)
+
+        );
+
+    }
 
 
 
@@ -59,53 +151,56 @@ export async function generateXTTS(
 
 
 
-    console.log("--------------------------------");
-    console.log(
-        "XTTS START"
+    return new Promise(
+
+        resolve=>{
+
+
+            const request = JSON.stringify({
+
+                text,
+
+                output,
+
+                style
+
+            });
+
+
+
+            pythonProcess.stdin.write(
+
+                request+"\n"
+
+            );
+
+
+
+            const check = setInterval(()=>{
+
+
+                fs.access(output)
+
+                .then(()=>{
+
+
+                    clearInterval(check);
+
+                    resolve(output);
+
+
+                })
+
+                .catch(()=>{});
+
+
+            },1000);
+
+
+
+        }
+
     );
 
-    console.log(
-        "Output:",
-        output
-    );
-
-    console.log(
-        "Text:",
-        text.length
-    );
-
-    console.log("--------------------------------");
-
-
-
-    await exec(
-
-        "python",
-
-        [
-
-            "scripts/xtts_generate.py",
-
-            "--text",
-
-            text,
-
-
-            "--output",
-
-            output,
-
-
-            "--style",
-
-            style
-
-        ]
-
-    );
-
-
-
-    return output;
 
 }
