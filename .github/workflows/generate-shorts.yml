@@ -26,7 +26,6 @@ on:
 
 
 
-
 jobs:
 
 
@@ -36,9 +35,7 @@ jobs:
     runs-on: ubuntu-latest
 
 
-
     env:
-
 
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
@@ -50,20 +47,16 @@ jobs:
 
       SHORTS_COUNT: ${{ inputs.count }}
 
-
-
+      COQUI_TOS_AGREED: "1"
 
 
 
     steps:
 
 
-
       - name: Checkout
 
         uses: actions/checkout@v4
-
-
 
 
 
@@ -76,7 +69,7 @@ jobs:
 
           node-version: 22
 
-
+          cache: npm
 
 
 
@@ -89,8 +82,7 @@ jobs:
 
           python-version: "3.11"
 
-
-
+          cache: pip
 
 
 
@@ -106,17 +98,11 @@ jobs:
 
 
 
-
-
-
       - name: Install Node Packages
 
         run: |
 
           npm install
-
-
-
 
 
 
@@ -142,9 +128,6 @@ jobs:
 
 
 
-
-
-
       - name: Prepare Piper Voice
 
         run: |
@@ -154,9 +137,6 @@ jobs:
           python -m piper.download_voices \
           tr_TR-dfki-medium \
           --data-dir voices
-
-
-
 
 
 
@@ -174,10 +154,7 @@ jobs:
 
 
 
-
-
-
-      - name: Check API Keys
+      - name: Check Environment
 
         run: |
 
@@ -187,9 +164,11 @@ jobs:
 
           echo "Pexels key length: ${#PEXELS_API_KEY}"
 
+          echo "Coqui agreement: $COQUI_TOS_AGREED"
 
+          python --version
 
-
+          node --version
 
 
 
@@ -199,9 +178,6 @@ jobs:
         run: |
 
           npm run typecheck
-
-
-
 
 
 
@@ -220,12 +196,12 @@ jobs:
 
           SHORTS_COUNT: ${{ inputs.count }}
 
+          COQUI_TOS_AGREED: "1"
+
+
         run: |
 
           npm run generate
-
-
-
 
 
 
@@ -239,9 +215,6 @@ jobs:
           echo "===== OUTPUT TREE ====="
 
           find . -maxdepth 5 -type f | sort
-
-
-
 
 
 
