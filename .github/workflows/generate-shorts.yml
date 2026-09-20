@@ -69,8 +69,6 @@ jobs:
 
           node-version: 22
 
-          cache: npm
-
 
 
 
@@ -81,8 +79,6 @@ jobs:
         with:
 
           python-version: "3.11"
-
-          cache: pip
 
 
 
