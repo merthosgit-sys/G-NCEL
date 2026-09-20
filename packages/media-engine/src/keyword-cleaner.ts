@@ -11,13 +11,17 @@ export function cleanKeywords(
 
         "science laboratory",
 
-        "electrical sparks"
+        "electrical sparks",
+
+        "generic technology",
+
+        "historical documentary"
 
     ];
 
 
 
-    return [
+    const unique = [
 
         ...new Set(
 
@@ -25,17 +29,31 @@ export function cleanKeywords(
 
         )
 
-    ]
+    ];
 
-    .filter(
 
-        keyword =>
 
-        !blocked.includes(
+    return unique.filter(
 
-            keyword.toLowerCase()
+        keyword => {
 
-        )
+
+            const lower =
+
+            keyword.toLowerCase();
+
+
+
+            return !blocked.some(
+
+                word =>
+
+                lower.includes(word)
+
+            );
+
+
+        }
 
     );
 
