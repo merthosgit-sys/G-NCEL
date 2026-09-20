@@ -5,6 +5,12 @@ from "./keyword-expander.js";
 
 
 import {
+    cleanKeywords
+}
+from "./keyword-cleaner.js";
+
+
+import {
     rankVideos,
     VideoCandidate
 }
