@@ -202,22 +202,23 @@ export async function generateXTTS(
     */
 
 
-    xttsQueue =
-        xttsQueue.then(
+   xttsQueue =
+    xttsQueue.then(
 
-            () =>
+        async () => {
 
-            runXTTS(
+            await runXTTS(
                 text,
                 output,
                 style
-            )
+            );
 
-        );
+        }
+
+    );
 
 
-
-    await xttsQueue;
+await xttsQueue;
 
 
 
