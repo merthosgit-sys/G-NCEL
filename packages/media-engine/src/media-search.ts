@@ -1,34 +1,36 @@
-import {
-    expandKeywords
-} from "./keyword-expander.js";
+import { 
+    expandKeywords 
+} from "./keyword-expander.js"; 
 
 
-import {
-    cleanKeywords
-} from "./keyword-cleaner.js";
+import { 
+    cleanKeywords 
+} from "./keyword-cleaner.js"; 
 
 
-import {
-    rankVideos,
-    VideoCandidate
-} from "./video-ranker.js";
+import { 
+    rankVideos, 
+    VideoCandidate 
+} from "./video-ranker.js"; 
 
 
-import {
-    searchPexelsVideos
-} from "./pexels.js";
+import { 
+    searchPexelsVideos 
+} from "./pexels.js"; 
 
 
 
 
 
-export async function findBestMedia(
+export async function findBestMedia( 
 
-    scene:any,
+    scene:any, 
 
-    folder:string
+    folder:string 
 
-):Promise<VideoCandidate>{
+):Promise<VideoCandidate>{ 
+
+
 
 
 
@@ -42,6 +44,8 @@ export async function findBestMedia(
 
 
 
+
+
     const queries =
 
     cleanKeywords(
@@ -49,6 +53,8 @@ export async function findBestMedia(
         expanded
 
     );
+
+
 
 
 
@@ -64,7 +70,10 @@ export async function findBestMedia(
 
 
 
+
     let videos:VideoCandidate[] = [];
+
+
 
 
 
@@ -79,6 +88,7 @@ export async function findBestMedia(
 
 
         try{
+
 
 
             const result =
@@ -113,10 +123,14 @@ export async function findBestMedia(
 
             );
 
+
         }
 
 
+
     }
+
+
 
 
 
@@ -140,13 +154,19 @@ export async function findBestMedia(
 
 
 
+
+
     const ranked =
 
     rankVideos(
 
-        videos
+        videos,
+
+        queries
 
     );
+
+
 
 
 
@@ -165,6 +185,8 @@ export async function findBestMedia(
         );
 
     }
+
+
 
 
 
