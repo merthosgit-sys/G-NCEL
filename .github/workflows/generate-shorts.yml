@@ -60,7 +60,6 @@ jobs:
 
 
 
-
       - name: Setup Node
 
         uses: actions/setup-node@v4
@@ -68,7 +67,6 @@ jobs:
         with:
 
           node-version: 22
-
 
 
 
@@ -82,6 +80,25 @@ jobs:
 
 
 
+      # XTTS model cache
+
+      - name: Cache XTTS Models
+
+        uses: actions/cache@v4
+
+        with:
+
+          path: |
+
+            ~/.local/share/tts
+
+          key: xtts-v2-model-${{ runner.os }}
+
+          restore-keys: |
+
+            xtts-v2-model-
+
+
 
       - name: Install FFmpeg
 
@@ -93,13 +110,11 @@ jobs:
 
 
 
-
       - name: Install Node Packages
 
         run: |
 
           npm install
-
 
 
 
@@ -109,18 +124,26 @@ jobs:
 
           python -m pip install --upgrade pip
 
+
           pip install piper-tts
+
 
           pip install openai-whisper
 
-          pip install TTS
 
-          pip install torch
+          pip install torch==2.1.2
 
-          pip install torchvision
 
-          pip install torchaudio
+          pip install torchvision==0.16.2
 
+
+          pip install torchaudio==2.1.2
+
+
+          pip install TTS==0.22.0
+
+
+          pip install transformers==4.33.2
 
 
 
@@ -136,7 +159,6 @@ jobs:
 
 
 
-
       - name: Create Output Folders
 
         run: |
@@ -146,7 +168,6 @@ jobs:
           mkdir -p output/work
 
           mkdir -p output/audio
-
 
 
 
@@ -168,13 +189,11 @@ jobs:
 
 
 
-
       - name: Type Check
 
         run: |
 
           npm run typecheck
-
 
 
 
@@ -201,7 +220,6 @@ jobs:
 
 
 
-
       - name: Debug Files
 
         if: always()
@@ -211,7 +229,6 @@ jobs:
           echo "===== OUTPUT TREE ====="
 
           find . -maxdepth 5 -type f | sort
-
 
 
 
