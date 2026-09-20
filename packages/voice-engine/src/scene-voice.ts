@@ -8,16 +8,6 @@ from "./xtts.js";
 
 
 
-import {
-
-    generatePiperVoice
-
-}
-
-from "./piper.js";
-
-
-
 
 
 export type VoiceStyle =
@@ -29,8 +19,6 @@ export type VoiceStyle =
     | "mysterious"
 
     | "neutral";
-
-
 
 
 
@@ -57,10 +45,9 @@ export interface GenerateSceneVoiceInput {
 
 
 
-
 export async function generateSceneVoice(
 
-    input:GenerateSceneVoiceInput
+input:GenerateSceneVoiceInput
 
 ):Promise<string>{
 
@@ -68,80 +55,37 @@ export async function generateSceneVoice(
 
     console.log(
 
-        "Queueing XTTS scene:",
+        "Generating scene:",
+
         input.sceneIndex
 
     );
 
 
 
-    try{
+    const result = await generateXTTS(
+
+        input.text,
+
+        input.output,
+
+        input.style
+
+    );
 
 
 
-        const result = await generateXTTS(
+    console.log(
 
-            input.text,
+        "Scene voice ready:",
 
-            input.output,
+        input.sceneIndex
 
-            input.style
-
-        );
+    );
 
 
 
-        console.log(
-
-            "XTTS scene success:",
-            input.sceneIndex
-
-        );
-
-
-
-        return result;
-
-
-
-    }
-
-    catch(error){
-
-
-
-        console.error(
-
-            "XTTS failed scene:",
-            input.sceneIndex,
-
-            error
-
-        );
-
-
-
-        // fallback tamamen kapalı değil
-        // ama hata gizlemiyoruz
-
-        console.log(
-            "Using Piper fallback"
-        );
-
-
-
-        return await generatePiperVoice(
-
-            input.text,
-
-            input.output,
-
-            input.sceneIndex
-
-        );
-
-    }
-
+    return result;
 
 
 }
