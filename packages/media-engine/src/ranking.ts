@@ -140,14 +140,10 @@ function calculateScore(
 
 
     if(
-
-        video.title
-
-    ){
-
-        score +=20;
-
-    }
+ video.height > video.width
+){
+ score +=40;
+}
 
 
 
