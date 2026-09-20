@@ -1,3 +1,6 @@
+import os
+
+os.environ["COQUI_TOS_AGREED"] = "1"
 import argparse
 import torch
 
