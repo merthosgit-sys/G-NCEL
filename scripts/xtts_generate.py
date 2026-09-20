@@ -38,9 +38,12 @@ args = parser.parse_args()
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-print("Generating Turkish voice...")
+
+print("--------------------------------")
+print("XTTS GENERATION")
 print("Device:", device)
 print("Style:", args.style)
+print("--------------------------------")
 
 
 
@@ -50,17 +53,23 @@ tts = TTS(
 
 
 
+# XTTS hazır speaker
+speaker = "Ana Florence"
+
+
+
 tts.tts_to_file(
 
     text=args.text,
 
     file_path=args.output,
 
-    speaker_wav=None,
+    speaker=speaker,
 
     language="tr"
 
 )
+
 
 
 print(
