@@ -2,7 +2,6 @@ import "dotenv/config";
 
 import axios from "axios";
 
-
 import {
     VideoCandidate
 }
@@ -10,31 +9,18 @@ from "./video-ranker.js";
 
 
 
-
-
-
 const apiKey =
-
 process.env.PEXELS_API_KEY;
-
-
 
 
 
 if(!apiKey){
 
     throw new Error(
-
         "PEXELS_API_KEY missing"
-
     );
 
 }
-
-
-
-
-
 
 
 
@@ -44,7 +30,6 @@ export async function searchPexelsVideos(
     query:string
 
 ):Promise<VideoCandidate[]>{
-
 
 
     const response =
@@ -66,9 +51,10 @@ export async function searchPexelsVideos(
 
                 query,
 
-                per_page:15,
+                per_page:20,
 
-                orientation:"landscape"
+                // Shorts için
+                orientation:"portrait"
 
             }
 
@@ -78,15 +64,9 @@ export async function searchPexelsVideos(
 
 
 
-
-
-
     const videos =
 
     response.data.videos ?? [];
-
-
-
 
 
 
@@ -97,12 +77,9 @@ export async function searchPexelsVideos(
         (video:any)=>{
 
 
-
             const files =
 
             video.video_files ?? [];
-
-
 
 
 
@@ -112,27 +89,35 @@ export async function searchPexelsVideos(
 
             .filter(
 
-                (f:any)=>
+                (f:any)=>{
 
-                f.width >=720
+
+                    if(!f.width || !f.height)
+
+                        return false;
+
+
+                    // dikey öncelik
+
+                    return (
+
+                        f.height >
+
+                        f.width
+
+                    );
+
+                }
 
             )
 
             .sort(
 
-                (
+                (a:any,b:any)=>
 
-                    a:any,
-
-                    b:any
-
-                )=>
-
-                b.width-a.width
+                b.height-a.height
 
             )[0];
-
-
 
 
 
@@ -144,9 +129,8 @@ export async function searchPexelsVideos(
 
 
 
-
-
             return {
+
 
                 id:
 
@@ -183,7 +167,6 @@ export async function searchPexelsVideos(
                 best.link
 
             };
-
 
 
         }
