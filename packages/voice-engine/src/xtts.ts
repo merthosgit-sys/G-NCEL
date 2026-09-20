@@ -1,17 +1,14 @@
-import { spawn } from "child_process";
+import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 import readline from "readline";
 import fs from "fs/promises";
 
 
 
-let pythonProcess:any = null;
+let pythonProcess: ChildProcessWithoutNullStreams | null = null;
 
 
 let ready = false;
 
-
-
-const queue:any[] = [];
 
 
 
@@ -26,6 +23,7 @@ function startXTTS(){
 
 
 
+
     pythonProcess = spawn(
 
         "python",
@@ -34,49 +32,11 @@ function startXTTS(){
 
             "scripts/xtts_server.py"
 
-        ]
+        ],
 
-    );
+        {
 
-
-
-    const rl = readline.createInterface({
-
-        input:
-
-        pythonProcess.stdout
-
-    });
-
-
-
-    rl.on(
-
-        "line",
-
-        line => {
-
-
-            console.log(
-
-                "XTTS:",
-                line
-
-            );
-
-
-
-            if(line.includes(
-
-                "XTTS MODEL READY"
-
-            )){
-
-
-                ready = true;
-
-            }
-
+            stdio:"pipe"
 
         }
 
@@ -84,14 +44,84 @@ function startXTTS(){
 
 
 
+
+
+    const rl = readline.createInterface({
+
+
+        input:
+
+        pythonProcess.stdout
+
+
+    });
+
+
+
+
+
+
+    rl.on(
+
+
+        "line",
+
+
+        (line:string)=>{
+
+
+            console.log(
+
+                "XTTS:",
+
+                line
+
+            );
+
+
+
+
+
+            if(
+
+                line.includes(
+
+                    "XTTS MODEL READY"
+
+                )
+
+            ){
+
+
+                ready = true;
+
+
+            }
+
+
+        }
+
+
+    );
+
+
+
+
+
+
+
     pythonProcess.stderr.on(
+
 
         "data",
 
-        data=>{
+
+        (data:Buffer)=>{
 
 
             console.error(
+
+                "XTTS ERROR:",
 
                 data.toString()
 
@@ -99,6 +129,42 @@ function startXTTS(){
 
 
         }
+
+
+    );
+
+
+
+
+
+
+
+    pythonProcess.on(
+
+
+        "close",
+
+
+        (code:number)=>{
+
+
+            console.log(
+
+                "XTTS server closed:",
+
+                code
+
+            );
+
+
+
+            pythonProcess = null;
+
+            ready = false;
+
+
+        }
+
 
     );
 
@@ -110,19 +176,30 @@ function startXTTS(){
 
 
 
+
+
+
 export async function generateXTTS(
+
 
     text:string,
 
+
     output:string,
 
+
     style:string="neutral"
+
 
 ):Promise<string>{
 
 
 
+
+
     startXTTS();
+
+
 
 
 
@@ -131,52 +208,122 @@ export async function generateXTTS(
 
         await new Promise(
 
-            r=>setTimeout(r,1000)
+            resolve =>
+
+            setTimeout(
+
+                resolve,
+
+                1000
+
+            )
 
         );
+
 
     }
 
 
 
+
+
+
+
     await fs.mkdir(
+
 
         "output/audio",
 
+
         {
+
+
             recursive:true
+
         }
+
 
     );
 
 
 
+
+
+
+
+
     return new Promise(
 
-        resolve=>{
+
+        (resolve,reject)=>{
+
+
+
+
+
+            if(!pythonProcess){
+
+
+                reject(
+
+                    new Error(
+
+                        "XTTS process not running"
+
+                    )
+
+                );
+
+
+                return;
+
+            }
+
+
+
+
+
 
 
             const request = JSON.stringify({
 
+
                 text,
+
 
                 output,
 
+
                 style
+
 
             });
 
 
 
+
+
+
+
+
             pythonProcess.stdin.write(
 
-                request+"\n"
+
+                request + "\n"
+
 
             );
 
 
 
+
+
+
+
             const check = setInterval(()=>{
+
+
+
 
 
                 fs.access(output)
@@ -186,7 +333,9 @@ export async function generateXTTS(
 
                     clearInterval(check);
 
+
                     resolve(output);
+
 
 
                 })
@@ -194,13 +343,21 @@ export async function generateXTTS(
                 .catch(()=>{});
 
 
+
+
+
             },1000);
+
+
+
 
 
 
         }
 
+
     );
+
 
 
 }
