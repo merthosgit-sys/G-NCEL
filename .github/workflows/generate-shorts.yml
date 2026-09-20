@@ -90,13 +90,33 @@ jobs:
 
           path: |
 
+            ~/.cache/tts
+
             ~/.local/share/tts
 
-          key: xtts-v2-model-${{ runner.os }}
+          key: xtts-v2-${{ runner.os }}
 
           restore-keys: |
 
-            xtts-v2-model-
+            xtts-v2-
+
+
+
+      # GitHub runner disk temizliği
+
+      - name: Free Disk Space
+
+        run: |
+
+          sudo rm -rf /usr/local/lib/android
+
+          sudo rm -rf /usr/share/dotnet
+
+          sudo rm -rf /opt/ghc
+
+          sudo apt clean
+
+          df -h
 
 
 
@@ -125,19 +145,20 @@ jobs:
           python -m pip install --upgrade pip
 
 
+          # CPU torch - küçük ve stabil
+
+          pip install torch==2.1.2+cpu \
+            torchvision==0.16.2+cpu \
+            torchaudio==2.1.2+cpu \
+            --index-url https://download.pytorch.org/whl/cpu
+
+
           pip install piper-tts
 
 
-          pip install openai-whisper
+          # torch tekrar indirmesin
 
-
-          pip install torch==2.1.2
-
-
-          pip install torchvision==0.16.2
-
-
-          pip install torchaudio==2.1.2
+          pip install openai-whisper --no-deps
 
 
           pip install TTS==0.22.0
@@ -186,6 +207,8 @@ jobs:
           python --version
 
           node --version
+
+          python -c "import torch; print(torch.__version__)"
 
 
 
