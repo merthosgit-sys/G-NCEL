@@ -58,13 +58,20 @@ from "./audio-enhancer.js";
 
 
 
+
+
 export {
 
-    generateSceneVoice
+    generateSceneVoice,
+
+    generateSceneVoiceBatch
 
 }
 
 from "./scene-voice.js";
+
+
+
 
 
 
@@ -74,11 +81,16 @@ export type {
 
     VoiceStyle,
 
-    GenerateSceneVoiceInput
+    GenerateSceneVoiceInput,
+
+    GenerateBatchVoiceInput
 
 }
 
 from "./scene-voice.js";
+
+
+
 
 
 
