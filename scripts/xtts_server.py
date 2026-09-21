@@ -11,11 +11,7 @@ from TTS.api import TTS
 
 
 
-print(
-    "XTTS MODEL LOADING",
-    flush=True
-)
-
+print("XTTS MODEL LOADING", flush=True)
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -28,47 +24,16 @@ print(
 )
 
 
-
-try:
-
-
-    tts = TTS(
-        "tts_models/multilingual/multi-dataset/xtts_v2"
-    ).to(device)
+tts = TTS(
+    "tts_models/multilingual/multi-dataset/xtts_v2"
+).to(device)
 
 
 
-    print(
-        "XTTS MODEL READY",
-        flush=True
-    )
-
-
-except Exception as e:
-
-
-    print(
-        json.dumps({
-
-            "status":"startup_error",
-
-            "message":str(e)
-
-        }),
-
-        flush=True
-    )
-
-
-    sys.exit(1)
-
-
-
-
-
-speaker = "Ana Florence"
-
-
+print(
+    "XTTS MODEL READY",
+    flush=True
+)
 
 
 
@@ -77,68 +42,56 @@ for line in sys.stdin:
 
     try:
 
-
-        data = json.loads(line)
-
+        data=json.loads(line)
 
 
-        text = data["text"]
+        texts=data["texts"]
+        outputs=data["outputs"]
 
-        output = data["output"]
 
-        style = data.get(
-            "style",
-            "neutral"
+        print(
+            json.dumps({
+                "status":"generating"
+            }),
+            flush=True
         )
+
+
+        for text,output in zip(
+            texts,
+            outputs
+        ):
+
+
+            tts.tts_to_file(
+
+                text=text,
+
+                file_path=output,
+
+                speaker="Ana Florence",
+
+                language="tr"
+
+            )
+
+
+            print(
+                json.dumps({
+                    "status":"file",
+                    "output":output
+                }),
+                flush=True
+            )
 
 
 
         print(
             json.dumps({
-
-                "status":"generating",
-
-                "output":output
-
+                "status":"done"
             }),
-
             flush=True
         )
-
-
-
-
-
-        tts.tts_to_file(
-
-            text=text,
-
-            file_path=output,
-
-            speaker=speaker,
-
-            language="tr"
-
-        )
-
-
-
-
-
-        print(
-            json.dumps({
-
-                "status":"ok",
-
-                "output":output
-
-            }),
-
-            flush=True
-        )
-
-
-
 
 
     except Exception as e:
@@ -146,12 +99,8 @@ for line in sys.stdin:
 
         print(
             json.dumps({
-
                 "status":"error",
-
                 "message":str(e)
-
             }),
-
             flush=True
         )
