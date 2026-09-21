@@ -1,6 +1,12 @@
-import { spawn, ChildProcessWithoutNullStreams } from "child_process";
+import { 
+    spawn, 
+    ChildProcessWithoutNullStreams 
+} from "child_process";
+
 import readline from "readline";
+
 import fs from "fs/promises";
+
 
 
 
@@ -8,6 +14,10 @@ let pythonProcess: ChildProcessWithoutNullStreams | null = null;
 
 
 let ready = false;
+
+
+let startupError:string | null = null;
+
 
 
 
@@ -46,6 +56,7 @@ function startXTTS(){
 
 
 
+
     const rl = readline.createInterface({
 
 
@@ -61,11 +72,11 @@ function startXTTS(){
 
 
 
+
+
     rl.on(
 
-
         "line",
-
 
         (line:string)=>{
 
@@ -99,10 +110,32 @@ function startXTTS(){
             }
 
 
+
+
+
+
+            if(
+
+                line.includes(
+
+                    "startup_error"
+
+                )
+
+            ){
+
+
+                startupError = line;
+
+
+            }
+
+
         }
 
-
     );
+
+
 
 
 
@@ -119,17 +152,38 @@ function startXTTS(){
         (data:Buffer)=>{
 
 
-            console.error(
+            const message =
 
-                "XTTS ERROR:",
+            data.toString();
 
-                data.toString()
 
-            );
+
+
+
+            // pytorch warninglerini gizle
+
+            if(
+
+                !message.includes(
+
+                    "FutureWarning"
+
+                )
+
+            ){
+
+                console.error(
+
+                    "XTTS STDERR:",
+
+                    message
+
+                );
+
+            }
 
 
         }
-
 
     );
 
@@ -139,18 +193,17 @@ function startXTTS(){
 
 
 
+
     pythonProcess.on(
 
-
         "close",
-
 
         (code:number)=>{
 
 
             console.log(
 
-                "XTTS server closed:",
+                "XTTS closed:",
 
                 code
 
@@ -165,12 +218,92 @@ function startXTTS(){
 
         }
 
-
     );
 
 
 
 }
+
+
+
+
+
+
+
+
+async function waitForReady(){
+
+
+
+    let seconds = 0;
+
+
+
+    while(!ready){
+
+
+
+        if(startupError){
+
+
+            throw new Error(
+
+                startupError
+
+            );
+
+        }
+
+
+
+
+
+        seconds++;
+
+
+
+
+
+        if(seconds > 300){
+
+
+            throw new Error(
+
+                "XTTS startup timeout"
+
+            );
+
+
+        }
+
+
+
+
+
+
+        await new Promise(
+
+            resolve =>
+
+            setTimeout(
+
+                resolve,
+
+                1000
+
+            )
+
+        );
+
+
+
+    }
+
+
+
+}
+
+
 
 
 
@@ -203,25 +336,7 @@ export async function generateXTTS(
 
 
 
-    while(!ready){
-
-
-        await new Promise(
-
-            resolve =>
-
-            setTimeout(
-
-                resolve,
-
-                1000
-
-            )
-
-        );
-
-
-    }
+    await waitForReady();
 
 
 
@@ -252,33 +367,29 @@ export async function generateXTTS(
 
 
 
+    if(!pythonProcess){
+
+
+        throw new Error(
+
+            "XTTS process unavailable"
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
     return new Promise(
 
 
         (resolve,reject)=>{
-
-
-
-
-
-            if(!pythonProcess){
-
-
-                reject(
-
-                    new Error(
-
-                        "XTTS process not running"
-
-                    )
-
-                );
-
-
-                return;
-
-            }
-
 
 
 
@@ -306,11 +417,10 @@ export async function generateXTTS(
 
 
 
-            pythonProcess.stdin.write(
 
+            pythonProcess!.stdin.write(
 
                 request + "\n"
-
 
             );
 
@@ -320,7 +430,8 @@ export async function generateXTTS(
 
 
 
-            const check = setInterval(()=>{
+
+            const timer = setInterval(()=>{
 
 
 
@@ -331,7 +442,19 @@ export async function generateXTTS(
                 .then(()=>{
 
 
-                    clearInterval(check);
+
+                    clearInterval(timer);
+
+
+
+                    console.log(
+
+                        "XTTS FILE READY:",
+
+                        output
+
+                    );
+
 
 
                     resolve(output);
@@ -353,8 +476,29 @@ export async function generateXTTS(
 
 
 
-        }
 
+            setTimeout(()=>{
+
+
+                clearInterval(timer);
+
+
+                reject(
+
+                    new Error(
+
+                        "XTTS generation timeout"
+
+                    )
+
+                );
+
+
+            },300000);
+
+
+
+        }
 
     );
 
