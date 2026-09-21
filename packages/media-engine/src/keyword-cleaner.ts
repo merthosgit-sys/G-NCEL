@@ -5,56 +5,214 @@ export function cleanKeywords(
 ):string[]{
 
 
-    const blocked = [
-
-        "electricity experiment",
-
-        "science laboratory",
-
-        "electrical sparks",
-
-        "generic technology",
-
-        "historical documentary"
-
-    ];
 
 
 
-    const unique = [
+    const blacklist = [
 
-        ...new Set(
+        "generic",
 
-            keywords
+        "general",
 
-        )
+        "random",
+
+        "stock footage",
+
+        "video clip",
+
+        "nice video",
+
+        "cool video"
 
     ];
 
 
 
-    return unique.filter(
-
-        keyword => {
-
-
-            const lower =
-
-            keyword.toLowerCase();
 
 
 
-            return !blocked.some(
 
-                word =>
+    const replacements = [
 
-                lower.includes(word)
 
-            );
+        [
+
+            "electrical sparks",
+
+            "electric sparks"
+
+        ],
+
+
+        [
+
+            "science laboratory",
+
+            "laboratory experiment"
+
+        ],
+
+
+        [
+
+            "historical documentary",
+
+            "historical footage"
+
+        ]
+
+
+    ];
+
+
+
+
+
+
+
+
+
+    const cleaned:string[] = [];
+
+
+
+
+
+
+
+    for(
+
+        let keyword of keywords
+
+    ){
+
+
+
+
+
+        keyword =
+
+        keyword
+
+        .trim()
+
+        .toLowerCase();
+
+
+
+
+
+
+
+        if(
+
+            keyword.length <3
+
+        ){
+
+            continue;
+
+        }
+
+
+
+
+
+
+
+
+        const blocked =
+
+        blacklist.some(
+
+            word =>
+
+            keyword.includes(word)
+
+        );
+
+
+
+
+
+
+
+        if(blocked){
+
+            continue;
+
+        }
+
+
+
+
+
+
+
+
+        for(
+
+            const [
+
+                oldWord,
+
+                newWord
+
+            ]
+
+            of replacements
+
+        ){
+
+
+            if(
+
+                keyword === oldWord
+
+            ){
+
+                keyword = newWord;
+
+            }
 
 
         }
 
-    );
+
+
+
+
+
+
+
+        if(
+
+            !cleaned.includes(
+
+                keyword
+
+            )
+
+        ){
+
+            cleaned.push(
+
+                keyword
+
+            );
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
+    return cleaned;
 
 }
