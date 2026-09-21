@@ -29,8 +29,6 @@ promisify(execFile);
 
 
 
-
-
 export async function runFFmpeg(
 
     args:string[]
@@ -46,8 +44,6 @@ export async function runFFmpeg(
         args.join(" ")
 
     );
-
-
 
 
 
@@ -112,21 +108,29 @@ export async function convertToShortsFormat(
 
 
 
+
+
         "-c:v",
 
         "libx264",
 
 
 
+
+
         "-preset",
 
-        "medium",
+        "veryfast",
+
+
 
 
 
         "-crf",
 
-        "20",
+        "23",
+
+
 
 
 
@@ -136,9 +140,13 @@ export async function convertToShortsFormat(
 
 
 
+
+
         "-b:a",
 
         "192k",
+
+
 
 
 
