@@ -1,23 +1,28 @@
-import { 
-    spawn, 
-    ChildProcessWithoutNullStreams 
-} from "child_process";
+import {
+    spawn,
+    ChildProcessWithoutNullStreams
+}
+from "child_process";
+
 
 import readline from "readline";
+
 
 import fs from "fs/promises";
 
 
 
-
-let pythonProcess: ChildProcessWithoutNullStreams | null = null;
-
-
-let ready = false;
+let pythonProcess:
+ChildProcessWithoutNullStreams | null = null;
 
 
-let startupError:string | null = null;
 
+let ready=false;
+
+
+
+const pending =
+new Map<string,()=>void>();
 
 
 
@@ -25,308 +30,116 @@ let startupError:string | null = null;
 function startXTTS(){
 
 
-    if(pythonProcess){
-
+    if(pythonProcess)
         return;
 
-    }
 
 
-
-
-    pythonProcess = spawn(
-
+    pythonProcess =
+    spawn(
         "python",
-
         [
-
             "scripts/xtts_server.py"
-
         ],
-
         {
-
             stdio:"pipe"
-
         }
-
     );
 
 
 
-
-
-
-    const rl = readline.createInterface({
-
+    const rl =
+    readline.createInterface({
 
         input:
-
         pythonProcess.stdout
-
 
     });
 
 
 
-
-
-
-
-
     rl.on(
-
         "line",
-
         (line:string)=>{
 
 
             console.log(
-
                 "XTTS:",
-
                 line
-
             );
 
 
+            try{
+
+
+                const data =
+                JSON.parse(line);
 
 
 
-            if(
+                if(
+                    data.status==="XTTS MODEL READY"
+                ){
 
-                line.includes(
+                    ready=true;
 
-                    "XTTS MODEL READY"
-
-                )
-
-            ){
+                }
 
 
-                ready = true;
+
+                if(
+                    data.status==="file"
+                ){
+
+                    const cb =
+                    pending.get(
+                        data.output
+                    );
+
+
+                    if(cb){
+
+                        cb();
+
+                        pending.delete(
+                            data.output
+                        );
+
+                    }
+
+                }
 
 
             }
-
-
-
-
-
-
-            if(
-
-                line.includes(
-
-                    "startup_error"
-
-                )
-
-            ){
-
-
-                startupError = line;
-
-
-            }
-
+            catch{}
 
         }
-
     );
-
-
-
-
-
-
 
 
 
     pythonProcess.stderr.on(
-
-
         "data",
-
-
         (data:Buffer)=>{
 
-
-            const message =
-
-            data.toString();
-
-
-
-
-
-            // pytorch warninglerini gizle
-
-            if(
-
-                !message.includes(
-
-                    "FutureWarning"
-
-                )
-
-            ){
-
-                console.error(
-
-                    "XTTS STDERR:",
-
-                    message
-
-                );
-
-            }
-
-
-        }
-
-    );
-
-
-
-
-
-
-
-
-    pythonProcess.on(
-
-        "close",
-
-        (code:number)=>{
-
-
-            console.log(
-
-                "XTTS closed:",
-
-                code
-
+            console.error(
+                data.toString()
             );
 
-
-
-            pythonProcess = null;
-
-            ready = false;
-
-
         }
-
     );
-
-
 
 }
 
 
 
+export async function generateXTTSBatch(
 
+    texts:string[],
 
+    outputs:string[]
 
-
-
-async function waitForReady(){
-
-
-
-    let seconds = 0;
-
-
-
-    while(!ready){
-
-
-
-        if(startupError){
-
-
-            throw new Error(
-
-                startupError
-
-            );
-
-        }
-
-
-
-
-
-        seconds++;
-
-
-
-
-
-        if(seconds > 300){
-
-
-            throw new Error(
-
-                "XTTS startup timeout"
-
-            );
-
-
-        }
-
-
-
-
-
-
-        await new Promise(
-
-            resolve =>
-
-            setTimeout(
-
-                resolve,
-
-                1000
-
-            )
-
-        );
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-export async function generateXTTS(
-
-
-    text:string,
-
-
-    output:string,
-
-
-    style:string="neutral"
-
-
-):Promise<string>{
-
-
+):Promise<string[]>{
 
 
 
@@ -334,174 +147,65 @@ export async function generateXTTS(
 
 
 
+    while(!ready){
 
-
-    await waitForReady();
-
-
-
-
-
-
-
-    await fs.mkdir(
-
-
-        "output/audio",
-
-
-        {
-
-
-            recursive:true
-
-        }
-
-
-    );
-
-
-
-
-
-
-
-
-    if(!pythonProcess){
-
-
-        throw new Error(
-
-            "XTTS process unavailable"
-
+        await new Promise(
+            r=>setTimeout(r,500)
         );
-
 
     }
 
 
 
+    await fs.mkdir(
+        "output/audio",
+        {
+            recursive:true
+        }
+    );
 
 
 
+    const promises =
+    outputs.map(
+
+        output=>
 
 
-    return new Promise(
+        new Promise<void>(resolve=>{
 
-
-        (resolve,reject)=>{
-
-
-
-
-
-
-            const request = JSON.stringify({
-
-
-                text,
-
-
+            pending.set(
                 output,
-
-
-                style
-
-
-            });
-
-
-
-
-
-
-
-
-
-            pythonProcess!.stdin.write(
-
-                request + "\n"
-
+                resolve
             );
 
-
-
-
-
-
-
-
-            const timer = setInterval(()=>{
-
-
-
-
-
-                fs.access(output)
-
-                .then(()=>{
-
-
-
-                    clearInterval(timer);
-
-
-
-                    console.log(
-
-                        "XTTS FILE READY:",
-
-                        output
-
-                    );
-
-
-
-                    resolve(output);
-
-
-
-                })
-
-                .catch(()=>{});
-
-
-
-
-
-            },1000);
-
-
-
-
-
-
-
-            setTimeout(()=>{
-
-
-                clearInterval(timer);
-
-
-                reject(
-
-                    new Error(
-
-                        "XTTS generation timeout"
-
-                    )
-
-                );
-
-
-            },300000);
-
-
-
-        }
+        })
 
     );
 
 
+
+    pythonProcess!.stdin.write(
+
+        JSON.stringify({
+
+            texts,
+
+            outputs
+
+        })
+
+        +"\n"
+
+    );
+
+
+
+    await Promise.all(
+        promises
+    );
+
+
+    return outputs;
 
 }
