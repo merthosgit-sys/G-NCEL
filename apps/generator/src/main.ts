@@ -31,7 +31,7 @@ from "../../../packages/render-engine/src/index.js";
 
 
 import {
-    generateSceneVoice,
+    generateSceneVoiceBatch,
     selectVoiceStyle,
     enhanceAudio
 }
@@ -75,6 +75,7 @@ interface Scene {
 
 
 
+
 interface ShortScript {
 
 
@@ -89,9 +90,12 @@ interface ShortScript {
 
     style:{
 
+
         visual:string;
 
+
         tone:string;
+
 
     };
 
@@ -103,7 +107,6 @@ interface ShortScript {
 
 
 }
-
 
 
 
@@ -146,12 +149,9 @@ async function prepareFolders(){
 
         "output",
 
-
         "output/final",
 
-
         "output/work",
-
 
         "output/audio"
 
@@ -165,7 +165,6 @@ async function prepareFolders(){
         const folder of folders
 
     ){
-
 
 
         await fs.mkdir(
@@ -206,13 +205,16 @@ async function mergeAudioFiles(
 
     if(files.length === 0){
 
+
         throw new Error(
 
             "Audio list empty"
 
         );
 
+
     }
+
 
 
 
@@ -221,6 +223,7 @@ async function mergeAudioFiles(
     const listPath =
 
     "output/audio-list.txt";
+
 
 
 
@@ -244,6 +247,8 @@ async function mergeAudioFiles(
 
 
 
+
+
     await fs.writeFile(
 
         listPath,
@@ -253,6 +258,9 @@ async function mergeAudioFiles(
         "utf8"
 
     );
+
+
+
 
 
 
@@ -379,6 +387,7 @@ async function generateVideo(
 
 
 
+
     const scriptText =
 
     await generateShortScript(
@@ -396,6 +405,8 @@ async function generateVideo(
         "SCRIPT GENERATED"
 
     );
+
+
 
 
 
@@ -426,14 +437,15 @@ async function generateVideo(
 
     ){
 
+
         throw new Error(
 
             "No scenes returned"
 
         );
 
-    }
 
+    }
 
 
 
@@ -478,6 +490,7 @@ async function generateVideo(
 
 
 
+
     await fs.writeFile(
 
         path.join(
@@ -508,11 +521,13 @@ async function generateVideo(
 
 
 
+
     console.log(
 
         "PREPARING MEDIA"
 
     );
+
 
 
 
@@ -527,9 +542,7 @@ async function generateVideo(
         scene => ({
 
 
-
             ...scene,
-
 
 
             searchQueries:
@@ -549,6 +562,7 @@ async function generateVideo(
                 scene.visualPrompt
 
             ]
+
 
         })
 
@@ -577,11 +591,8 @@ async function generateVideo(
 
 
 
-    if(
+    if(clips.length === 0){
 
-        clips.length === 0
-
-    ){
 
         throw new Error(
 
@@ -589,7 +600,9 @@ async function generateVideo(
 
         );
 
+
     }
+
 
 
 
@@ -606,6 +619,7 @@ async function generateVideo(
         "merged.mp4"
 
     );
+
 
 
 
@@ -640,41 +654,54 @@ async function generateVideo(
 
 
 
+
+    /*
+        XTTS BATCH VOICE
+    */
+
+
+
     const sceneAudios:string[] = [];
 
 
 
 
 
+    const voiceScenes =
 
+    script.scenes.map(
 
-    for(
-
-        const scene of script.scenes
-
-    ){
+        scene => {
 
 
 
-        const audio =
+            const audio =
 
-        path.join(
+            path.join(
 
-            folder,
+                folder,
 
-            `scene-${scene.id}.wav`
+                `scene-${scene.id}.wav`
 
-        );
-
+            );
 
 
 
 
 
+            sceneAudios.push(
 
-        await generateSceneVoice(
+                audio
 
-            {
+            );
+
+
+
+
+
+
+
+            return {
 
 
                 text:
@@ -710,24 +737,26 @@ async function generateVideo(
                 scene.id
 
 
-            }
-
-        );
+            };
 
 
+        }
+
+    );
 
 
 
 
 
-        sceneAudios.push(
-
-            audio
-
-        );
 
 
-    }
+
+    await generateSceneVoiceBatch({
+
+        scenes:voiceScenes
+
+    });
+
 
 
 
@@ -751,6 +780,7 @@ async function generateVideo(
 
 
 
+
     await mergeAudioFiles(
 
         sceneAudios,
@@ -758,6 +788,7 @@ async function generateVideo(
         rawAudio
 
     );
+
 
 
 
@@ -781,6 +812,7 @@ async function generateVideo(
 
 
 
+
     await enhanceAudio(
 
         rawAudio,
@@ -788,6 +820,7 @@ async function generateVideo(
         finalAudio
 
     );
+
 
 
 
@@ -811,6 +844,7 @@ async function generateVideo(
 
 
 
+
     await createSubtitle(
 
         finalAudio,
@@ -818,6 +852,7 @@ async function generateVideo(
         subtitle
 
     );
+
 
 
 
@@ -843,6 +878,7 @@ async function generateVideo(
 
 
 
+
     await renderShort(
 
         mergedVideo,
@@ -861,6 +897,7 @@ async function generateVideo(
 
 
 
+
     console.log(
 
         "CREATED",
@@ -868,8 +905,6 @@ async function generateVideo(
         finalVideo
 
     );
-
-
 
 
 
@@ -898,11 +933,13 @@ async function main(){
 
 
 
+
     console.log(
 
         "===== SHORTS FACTORY V4 ====="
 
     );
+
 
 
 
@@ -926,6 +963,7 @@ async function main(){
 
 
 
+
     console.log(
 
         "TOPICS",
@@ -933,6 +971,7 @@ async function main(){
         topics
 
     );
+
 
 
 
@@ -949,7 +988,6 @@ async function main(){
         i++
 
     ){
-
 
 
         await generateVideo(
@@ -969,6 +1007,7 @@ async function main(){
 
 
 
+
     console.log(
 
         "ALL DONE"
@@ -977,6 +1016,7 @@ async function main(){
 
 
 }
+
 
 
 
