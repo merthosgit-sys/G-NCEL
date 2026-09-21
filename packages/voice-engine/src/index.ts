@@ -8,8 +8,6 @@ from "./xtts.js";
 
 
 
-
-
 export {
 
     generateVoice
@@ -17,8 +15,6 @@ export {
 }
 
 from "./piper.js";
-
-
 
 
 
@@ -32,8 +28,6 @@ from "./piper.js";
 
 
 
-
-
 export {
 
     enhanceVoice
@@ -41,8 +35,6 @@ export {
 }
 
 from "./audio-enhancer.js";
-
-
 
 
 
@@ -56,11 +48,11 @@ from "./audio-enhancer.js";
 
 
 
-
-
 export type {
 
-    VoiceStyle
+    VoiceStyle,
+
+    GenerateSceneVoiceInput
 
 }
 
