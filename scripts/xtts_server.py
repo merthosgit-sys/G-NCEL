@@ -11,24 +11,64 @@ from TTS.api import TTS
 
 
 
-print("Loading XTTS model...")
+print(
+    "XTTS MODEL LOADING",
+    flush=True
+)
+
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
+print(
+    "DEVICE:",
+    device,
+    flush=True
+)
 
-tts = TTS(
-    "tts_models/multilingual/multi-dataset/xtts_v2"
-).to(device)
+
+
+try:
+
+
+    tts = TTS(
+        "tts_models/multilingual/multi-dataset/xtts_v2"
+    ).to(device)
 
 
 
-print("XTTS MODEL READY")
+    print(
+        "XTTS MODEL READY",
+        flush=True
+    )
+
+
+except Exception as e:
+
+
+    print(
+        json.dumps({
+
+            "status":"startup_error",
+
+            "message":str(e)
+
+        }),
+
+        flush=True
+    )
+
+
+    sys.exit(1)
+
+
 
 
 
 speaker = "Ana Florence"
+
+
 
 
 
@@ -54,10 +94,18 @@ for line in sys.stdin:
 
 
         print(
-            "Generating:",
-            output,
+            json.dumps({
+
+                "status":"generating",
+
+                "output":output
+
+            }),
+
             flush=True
         )
+
+
 
 
 
@@ -75,6 +123,8 @@ for line in sys.stdin:
 
 
 
+
+
         print(
             json.dumps({
 
@@ -85,8 +135,9 @@ for line in sys.stdin:
             }),
 
             flush=True
-
         )
+
+
 
 
 
@@ -94,7 +145,6 @@ for line in sys.stdin:
 
 
         print(
-
             json.dumps({
 
                 "status":"error",
@@ -104,5 +154,4 @@ for line in sys.stdin:
             }),
 
             flush=True
-
         )
