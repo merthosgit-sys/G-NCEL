@@ -15,9 +15,12 @@ from "./video-ranker.js";
 
 
 
+
 const apiKey =
 
 process.env.PEXELS_API_KEY;
+
+
 
 
 
@@ -32,6 +35,238 @@ if(!apiKey){
     );
 
 }
+
+
+
+
+
+
+
+
+
+function selectBestFile(
+
+    files:any[]
+
+){
+
+
+
+    const valid =
+
+    files.filter(
+
+        file => {
+
+
+            if(
+
+                !file.width ||
+
+                !file.height ||
+
+                !file.link
+
+            ){
+
+                return false;
+
+            }
+
+
+            return true;
+
+
+        }
+
+    );
+
+
+
+
+
+
+
+    if(
+
+        valid.length === 0
+
+    ){
+
+        return null;
+
+    }
+
+
+
+
+
+
+
+
+    return valid.sort(
+
+        (
+
+            a,
+
+            b
+
+        )=>{
+
+
+
+
+
+            const scoreA =
+
+            calculateFileScore(
+
+                a
+
+            );
+
+
+
+
+
+
+            const scoreB =
+
+            calculateFileScore(
+
+                b
+
+            );
+
+
+
+
+
+
+
+            return scoreB-scoreA;
+
+
+
+        }
+
+    )[0];
+
+}
+
+
+
+
+
+
+
+
+
+function calculateFileScore(
+
+    file:any
+
+):number{
+
+
+    let score = 0;
+
+
+
+
+
+
+
+    /*
+        Shorts dikey avantaj
+    */
+
+
+    if(
+
+        file.height >
+
+        file.width
+
+    ){
+
+        score +=50;
+
+    }
+
+    else{
+
+        score -=40;
+
+    }
+
+
+
+
+
+
+
+    /*
+        Ideal çözünürlük
+    */
+
+
+    if(
+
+        file.width >=1080 &&
+
+        file.height >=1920
+
+    ){
+
+        score +=40;
+
+    }
+
+    else if(
+
+        file.width >=720
+
+    ){
+
+        score +=20;
+
+    }
+
+
+
+
+
+
+
+    /*
+        Çok büyük dosya gereksiz
+    */
+
+
+    if(
+
+        file.width >2160
+
+    ){
+
+        score -=10;
+
+    }
+
+
+
+
+
+
+
+    return score;
+
+
+}
+
+
 
 
 
@@ -67,6 +302,7 @@ export async function searchPexelsVideos(
             },
 
 
+
             params:{
 
 
@@ -90,9 +326,15 @@ export async function searchPexelsVideos(
 
 
 
+
+
+
+
     const videos =
 
     response.data.videos ?? [];
+
+
 
 
 
@@ -110,76 +352,14 @@ export async function searchPexelsVideos(
 
 
 
-            const files =
-
-            video.video_files ?? [];
-
-
-
-
-
-
 
             const best =
 
-            files
+            selectBestFile(
 
-            .filter(
+                video.video_files ?? []
 
-                (file:any)=>{
-
-
-                    if(
-
-                        !file.width ||
-
-                        !file.height
-
-                    ){
-
-                        return false;
-
-                    }
-
-
-
-
-
-                    return (
-
-                        file.height >
-
-                        file.width
-
-                    );
-
-                }
-
-            )
-
-            .sort(
-
-                (
-
-                    a:any,
-
-                    b:any
-
-                )=>{
-
-
-                    return (
-
-                        b.height -
-
-                        a.height
-
-                    );
-
-
-                }
-
-            )[0];
+            );
 
 
 
@@ -187,7 +367,11 @@ export async function searchPexelsVideos(
 
 
 
-            if(!best){
+            if(
+
+                !best
+
+            ){
 
                 return null;
 
@@ -224,19 +408,25 @@ export async function searchPexelsVideos(
 
                 duration:
 
-                video.duration,
+                video.duration ?? 0,
 
 
 
                 title:
 
-                video.url ?? "",
+                (
+
+                    video.url ??
+
+                    ""
+
+                ),
 
 
 
                 url:
 
-                video.url,
+                video.url ?? "",
 
 
 
@@ -247,6 +437,7 @@ export async function searchPexelsVideos(
 
 
             };
+
 
 
 
