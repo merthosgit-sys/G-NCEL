@@ -1,34 +1,63 @@
-import { 
-    expandKeywords 
-} from "./keyword-expander.js"; 
+import {
 
+    expandKeywords
 
-import { 
-    cleanKeywords 
-} from "./keyword-cleaner.js"; 
+}
 
-
-import { 
-    rankVideos, 
-    VideoCandidate 
-} from "./video-ranker.js"; 
-
-
-import { 
-    searchPexelsVideos 
-} from "./pexels.js"; 
+from "./keyword-expander.js";
 
 
 
+import {
+
+    cleanKeywords
+
+}
+
+from "./keyword-cleaner.js";
 
 
-export async function findBestMedia( 
 
-    scene:any, 
+import {
 
-    folder:string 
+    rankVideos,
 
-):Promise<VideoCandidate>{ 
+    markVideoUsed,
+
+    VideoCandidate
+
+}
+
+from "./video-ranker.js";
+
+
+
+import {
+
+    searchPexelsVideos
+
+}
+
+from "./pexels.js";
+
+
+
+
+
+
+
+
+
+export async function findBestMedia(
+
+
+    scene:any,
+
+
+    folder:string
+
+
+):Promise<VideoCandidate>{
 
 
 
@@ -46,13 +75,42 @@ export async function findBestMedia(
 
 
 
-    const queries =
+
+
+    let queries =
 
     cleanKeywords(
 
         expanded
 
     );
+
+
+
+
+
+
+
+    /*
+       Eğer cleaner her şeyi silerse
+       orijinal sorguya dön
+    */
+
+
+    if(
+
+        queries.length === 0
+
+    ){
+
+        queries =
+
+        scene.searchQueries ?? [];
+
+    }
+
+
+
 
 
 
@@ -71,7 +129,11 @@ export async function findBestMedia(
 
 
 
+
+
     let videos:VideoCandidate[] = [];
+
+
 
 
 
@@ -101,11 +163,15 @@ export async function findBestMedia(
 
 
 
+
+
             videos.push(
 
                 ...result
 
             );
+
+
 
 
 
@@ -127,8 +193,9 @@ export async function findBestMedia(
         }
 
 
-
     }
+
+
 
 
 
@@ -142,13 +209,56 @@ export async function findBestMedia(
 
     ){
 
+
         throw new Error(
 
             "No media candidates found"
 
         );
 
+
     }
+
+
+
+
+
+
+
+
+
+    /*
+       Aynı video ID tekrarlarını temizle
+    */
+
+
+    const uniqueVideos =
+
+    Array.from(
+
+        new Map(
+
+            videos.map(
+
+                video =>
+
+                [
+
+                    video.id,
+
+                    video
+
+                ]
+
+            )
+
+        )
+
+        .values()
+
+    );
+
+
 
 
 
@@ -160,11 +270,13 @@ export async function findBestMedia(
 
     rankVideos(
 
-        videos,
+        uniqueVideos,
 
         queries
 
     );
+
+
 
 
 
@@ -178,13 +290,40 @@ export async function findBestMedia(
 
     ){
 
+
         throw new Error(
 
             "Ranking failed"
 
         );
 
+
     }
+
+
+
+
+
+
+
+
+
+    const selected =
+
+    ranked[0];
+
+
+
+
+
+
+
+    markVideoUsed(
+
+        selected.id
+
+    );
+
 
 
 
@@ -196,7 +335,19 @@ export async function findBestMedia(
 
         "BEST MEDIA:",
 
-        ranked[0].url
+        {
+
+            id:selected.id,
+
+            url:selected.url,
+
+            size:
+
+            `${selected.width}x${selected.height}`,
+
+            duration:selected.duration
+
+        }
 
     );
 
@@ -204,6 +355,11 @@ export async function findBestMedia(
 
 
 
-    return ranked[0];
+
+
+
+    return selected;
+
+
 
 }
