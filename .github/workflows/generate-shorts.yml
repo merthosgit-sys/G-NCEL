@@ -22,7 +22,8 @@ on:
 
         required: true
 
-        default: "3"
+        default: "1"
+
 
 
 
@@ -35,7 +36,9 @@ jobs:
     runs-on: ubuntu-latest
 
 
+
     env:
+
 
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
@@ -51,7 +54,9 @@ jobs:
 
 
 
+
     steps:
+
 
 
       - name: Checkout
@@ -60,11 +65,18 @@ jobs:
 
 
 
+
+
+
       - name: Setup Node
-  uses: actions/setup-node@v4
-  with:
-    node-version: 22
-    cache: npm
+
+        uses: actions/setup-node@v4
+
+        with:
+
+          node-version: 22
+
+
 
 
 
@@ -78,9 +90,11 @@ jobs:
 
 
 
+
+
       # XTTS model cache
 
-      - name: Cache XTTS Models
+      - name: Cache XTTS Model
 
         uses: actions/cache@v4
 
@@ -88,19 +102,19 @@ jobs:
 
           path: |
 
-            ~/.cache/tts
-
             ~/.local/share/tts
 
-          key: xtts-v2-${{ runner.os }}
+            ~/.cache/tts
+
+          key: xtts-model-${{ runner.os }}
 
           restore-keys: |
 
-            xtts-v2-
+            xtts-model-
 
 
 
-      # GitHub runner disk temizliği
+
 
       - name: Free Disk Space
 
@@ -118,6 +132,8 @@ jobs:
 
 
 
+
+
       - name: Install FFmpeg
 
         run: |
@@ -125,6 +141,8 @@ jobs:
           sudo apt update
 
           sudo apt install -y ffmpeg
+
+
 
 
 
@@ -136,6 +154,8 @@ jobs:
 
 
 
+
+
       - name: Install AI Packages
 
         run: |
@@ -143,18 +163,11 @@ jobs:
           python -m pip install --upgrade pip
 
 
-          # CPU torch - küçük ve stabil
-
-          pip install torch==2.1.2+cpu \
-            torchvision==0.16.2+cpu \
-            torchaudio==2.1.2+cpu \
-            --index-url https://download.pytorch.org/whl/cpu
+          pip install torch==2.1.2+cpu torchvision==0.16.2+cpu torchaudio==2.1.2+cpu --index-url https://download.pytorch.org/whl/cpu
 
 
           pip install piper-tts
 
-
-          # torch tekrar indirmesin
 
           pip install openai-whisper --no-deps
 
@@ -163,6 +176,8 @@ jobs:
 
 
           pip install transformers==4.33.2
+
+
 
 
 
@@ -178,6 +193,8 @@ jobs:
 
 
 
+
+
       - name: Create Output Folders
 
         run: |
@@ -187,6 +204,8 @@ jobs:
           mkdir -p output/work
 
           mkdir -p output/audio
+
+
 
 
 
@@ -210,6 +229,8 @@ jobs:
 
 
 
+
+
       - name: Type Check
 
         run: |
@@ -218,26 +239,15 @@ jobs:
 
 
 
+
+
       - name: Generate Shorts
-
-        env:
-
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-
-          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-
-          SHORTS_TOPIC: ${{ inputs.topic }}
-
-          SHORTS_COUNT: ${{ inputs.count }}
-
-          COQUI_TOS_AGREED: "1"
-
 
         run: |
 
           npm run generate
+
+
 
 
 
@@ -250,6 +260,8 @@ jobs:
           echo "===== OUTPUT TREE ====="
 
           find . -maxdepth 5 -type f | sort
+
+
 
 
 
