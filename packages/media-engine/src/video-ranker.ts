@@ -29,6 +29,32 @@ export interface VideoCandidate {
 
 
 
+
+const usedVideos = new Set<number>();
+
+
+
+
+
+
+
+
+export function resetVideoHistory(){
+
+
+    usedVideos.clear();
+
+
+}
+
+
+
+
+
+
+
+
+
 export function rankVideos(
 
     videos:VideoCandidate[],
@@ -48,6 +74,8 @@ export function rankVideos(
         videos
 
     );
+
+
 
 
 
@@ -96,7 +124,12 @@ export function rankVideos(
 
     );
 
+
 }
+
+
+
+
 
 
 
@@ -106,10 +139,18 @@ function removeDuplicates(
 
     videos:VideoCandidate[]
 
-){
+):VideoCandidate[]{
 
 
-    const seen = new Set<number>();
+
+
+
+    const seen =
+
+    new Set<number>();
+
+
+
 
 
     return videos.filter(
@@ -128,7 +169,13 @@ function removeDuplicates(
             }
 
 
-            seen.add(video.id);
+
+            seen.add(
+
+                video.id
+
+            );
+
 
 
             return true;
@@ -139,7 +186,10 @@ function removeDuplicates(
     );
 
 
+
 }
+
+
 
 
 
@@ -163,6 +213,8 @@ function calculateScore(
 
 
 
+
+
     const text =
 
     (
@@ -176,6 +228,34 @@ function calculateScore(
     )
 
     .toLowerCase();
+
+
+
+
+
+
+
+
+    /*
+        Aynı video tekrar seçilmesin
+    */
+
+
+    if(
+
+        usedVideos.has(
+
+            video.id
+
+        )
+
+    ){
+
+        score -=100;
+
+    }
+
+
 
 
 
@@ -210,7 +290,11 @@ function calculateScore(
 
 
 
-    let keywordMatches = 0;
+
+
+    let matches = 0;
+
+
 
 
 
@@ -227,7 +311,7 @@ function calculateScore(
 
         ){
 
-            keywordMatches++;
+            matches++;
 
         }
 
@@ -237,9 +321,13 @@ function calculateScore(
 
 
 
+
+
     score +=
 
-    keywordMatches * 12;
+    matches * 15;
+
+
 
 
 
@@ -248,7 +336,7 @@ function calculateScore(
 
 
     /*
-        Shorts format
+        Portrait Shorts avantajı
     */
 
 
@@ -260,17 +348,18 @@ function calculateScore(
 
     ){
 
-        score +=50;
+        score +=60;
 
     }
 
     else{
 
 
-        score -=40;
+        score -=50;
 
 
     }
+
 
 
 
@@ -290,7 +379,7 @@ function calculateScore(
 
     ){
 
-        score +=40;
+        score +=50;
 
     }
 
@@ -300,7 +389,7 @@ function calculateScore(
 
     ){
 
-        score +=30;
+        score +=35;
 
     }
 
@@ -310,7 +399,7 @@ function calculateScore(
 
     ){
 
-        score +=20;
+        score +=25;
 
     }
 
@@ -324,6 +413,16 @@ function calculateScore(
 
     }
 
+    else{
+
+
+        score -=20;
+
+
+    }
+
+
+
 
 
 
@@ -332,8 +431,6 @@ function calculateScore(
 
     /*
         Süre
-
-        Shorts için ideal
     */
 
 
@@ -341,17 +438,17 @@ function calculateScore(
 
         video.duration >=5 &&
 
-        video.duration <=60
+        video.duration <=45
 
     ){
 
-        score +=20;
+        score +=25;
 
     }
 
     else if(
 
-        video.duration >120
+        video.duration >90
 
     ){
 
@@ -364,18 +461,52 @@ function calculateScore(
 
 
 
+
+
+
     /*
-        Çok küçük videoları düşür
+        Kalitesiz stok içerik cezası
     */
 
 
-    if(
+    const genericWords = [
 
-        video.width <500
+        "abstract",
+
+        "background",
+
+        "animation",
+
+        "generic",
+
+        "wallpaper",
+
+        "stock"
+
+    ];
+
+
+
+
+
+    for(
+
+        const word of genericWords
 
     ){
 
-        score -=30;
+
+        if(
+
+            text.includes(word)
+
+        ){
+
+            score -=15;
+
+
+        }
+
 
     }
 
@@ -383,7 +514,34 @@ function calculateScore(
 
 
 
+
+
+
     return score;
+
+
+}
+
+
+
+
+
+
+
+
+
+export function markVideoUsed(
+
+    id:number
+
+){
+
+
+    usedVideos.add(
+
+        id
+
+    );
 
 
 }
