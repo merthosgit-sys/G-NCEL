@@ -1,10 +1,8 @@
 import {
 
-    generateXTTS
+    generateXTTSBatch
 
-}
-
-from "./xtts.js";
+} from "./xtts.js";
 
 
 
@@ -19,6 +17,8 @@ export type VoiceStyle =
     | "mysterious"
 
     | "neutral";
+
+
 
 
 
@@ -45,47 +45,160 @@ export interface GenerateSceneVoiceInput {
 
 
 
+
+
+
+
+export interface GenerateBatchVoiceInput {
+
+
+    scenes:GenerateSceneVoiceInput[];
+
+
+}
+
+
+
+
+
+
+
+
+
+export async function generateSceneVoiceBatch(
+
+    input:GenerateBatchVoiceInput
+
+):Promise<string[]>{
+
+
+
+
+
+    console.log(
+
+        "Generating batch voices:",
+
+        input.scenes.length
+
+    );
+
+
+
+
+
+
+    const texts =
+
+    input.scenes.map(
+
+        scene => scene.text
+
+    );
+
+
+
+
+
+    const outputs =
+
+    input.scenes.map(
+
+        scene => scene.output
+
+    );
+
+
+
+
+
+
+
+
+    const result =
+
+    await generateXTTSBatch(
+
+        texts,
+
+        outputs
+
+    );
+
+
+
+
+
+
+
+
+    input.scenes.forEach(
+
+        scene => {
+
+
+            console.log(
+
+                "Scene voice ready:",
+
+                scene.sceneIndex
+
+            );
+
+
+        }
+
+    );
+
+
+
+
+
+
+
+
+    return result;
+
+
+}
+
+
+
+
+
+
+
+
+
+/*
+ Eski sistem ile uyumluluk
+*/
+
 export async function generateSceneVoice(
 
-input:GenerateSceneVoiceInput
+    input:GenerateSceneVoiceInput
 
 ):Promise<string>{
 
 
 
-    console.log(
-
-        "Generating scene:",
-
-        input.sceneIndex
-
-    );
 
 
+    const result =
 
-    const result = await generateXTTS(
+    await generateSceneVoiceBatch({
 
-        input.text,
+        scenes:[input]
 
-        input.output,
-
-        input.style
-
-    );
+    });
 
 
 
-    console.log(
-
-        "Scene voice ready:",
-
-        input.sceneIndex
-
-    );
 
 
 
-    return result;
+    return result[0];
+
 
 
 }
