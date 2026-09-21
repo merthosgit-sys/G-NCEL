@@ -6,7 +6,14 @@ export function expandKeywords(
 
 
 
+
+
     const result = new Set<string>();
+
+
+
+
+
 
 
 
@@ -17,14 +24,59 @@ export function expandKeywords(
     ){
 
 
-        result.add(query);
+
+        const clean =
+
+        query
+
+        .trim();
+
+
+
+
+
+        if(
+
+            !clean
+
+        ){
+
+            continue;
+
+        }
+
+
+
+
+
+
+        result.add(
+
+            clean
+
+        );
+
+
+
+
 
 
 
         const lower =
 
-        query.toLowerCase();
+        clean.toLowerCase();
 
+
+
+
+
+
+
+
+
+        /*
+            Tesla
+        */
 
 
         if(
@@ -33,29 +85,98 @@ export function expandKeywords(
 
         ){
 
-            result.add(
-
-                "Tesla laboratory"
-
-            );
 
 
             result.add(
 
-                "Tesla coil"
+                "Nikola Tesla historical laboratory"
 
             );
+
 
 
             result.add(
 
-                "wireless electricity"
+                "Tesla coil electricity experiment"
 
             );
+
+
+
+            result.add(
+
+                "Wardenclyffe Tower Tesla"
+
+            );
+
 
         }
 
 
+
+
+
+
+
+
+
+        /*
+            Elektrik / enerji
+        */
+
+
+        if(
+
+            lower.includes("electric")
+
+            ||
+
+            lower.includes("energy")
+
+            ||
+
+            lower.includes("power")
+
+        ){
+
+
+
+            result.add(
+
+                "electrical invention history"
+
+            );
+
+
+
+            result.add(
+
+                "high voltage experiment"
+
+            );
+
+
+
+            result.add(
+
+                "electricity technology close up"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+
+        /*
+            Araba
+        */
 
 
         if(
@@ -66,26 +187,33 @@ export function expandKeywords(
 
             lower.includes("automobile")
 
+            ||
+
+            lower.includes("vehicle")
+
         ){
 
 
+
             result.add(
 
-                "classic car history"
+                "classic automobile history"
 
             );
 
 
+
             result.add(
 
-                "old automobile"
+                "vintage car engine"
 
             );
 
 
+
             result.add(
 
-                "vintage engine"
+                "car technology evolution"
 
             );
 
@@ -93,30 +221,107 @@ export function expandKeywords(
         }
 
 
+
+
+
+
+
+
+
+        /*
+            Uzay
+        */
 
 
         if(
 
             lower.includes("space")
 
+            ||
+
+            lower.includes("planet")
+
+            ||
+
+            lower.includes("nasa")
+
         ){
+
 
 
             result.add(
 
-                "space documentary"
+                "space exploration documentary"
 
             );
 
 
+
             result.add(
 
-                "planet earth"
+                "planet earth from space"
+
+            );
+
+
+
+            result.add(
+
+                "astronomy telescope footage"
 
             );
 
 
         }
+
+
+
+
+
+
+
+
+
+        /*
+            Tarih
+        */
+
+
+        if(
+
+            lower.includes("history")
+
+            ||
+
+            lower.includes("ancient")
+
+            ||
+
+            lower.includes("old")
+
+        ){
+
+
+
+            result.add(
+
+                "historical archive footage"
+
+            );
+
+
+
+            result.add(
+
+                "museum historical artifact"
+
+            );
+
+
+
+        }
+
+
 
 
 
@@ -124,6 +329,23 @@ export function expandKeywords(
 
 
 
-    return Array.from(result);
+
+
+
+
+
+    return Array.from(
+
+        result
+
+    )
+
+    .slice(
+
+        0,
+
+        12
+
+    );
 
 }
