@@ -209,3 +209,26 @@ export async function generateXTTSBatch(
     return outputs;
 
 }
+export async function generateXTTS(
+
+    text:string,
+
+    output:string,
+
+    style:string="neutral"
+
+):Promise<string>{
+
+
+    const result = await generateXTTSBatch(
+
+        [text],
+
+        [output]
+
+    );
+
+
+    return result[0];
+
+}
